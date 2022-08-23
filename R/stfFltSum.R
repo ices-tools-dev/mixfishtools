@@ -1,11 +1,10 @@
-#' @name effortFltStk
-#' @title Data.frame containing information on quota uptake and associated
-#'   effort. Status quo effort from the final data year is also included for
-#'   reference.
+#' @name stfFltSum
+#' @title Data.frame containing short-term forecast summary of catch-related
+#'   variables per fleet
 #'
-#' @description The \code{effortFltStk} data.frame lists stock names and
-#'   corresponding colors for consistency across plots. To be used as a look-up
-#'   table in converting between variable stock names and printed ones.
+#' @description The \code{stfFltSum} data.frame is an output of
+#'   `FLBEIA::fltSum()`. Provides example data for use in
+#'   `plot_effortFltStk`.
 #'
 #' \itemize{
 #'   \item year - advice year
@@ -24,12 +23,12 @@
 #' @format data.frame
 #' @source WGMIXFISH-Advice 2021, North Sea case study.
 #'   \url{[https://github.com/ices-taf/2021_NrS_MixedFisheriesAdvice]}
-#' @usage data(effortFltStk)
+#' @usage data(stfFltSum)
 #' @keywords datasets
 #' @examples
 #'
-#' data(effortFltStk)
-#' head(effortFltStk)
+#' data(stfFltSum)
+#' head(stfFltSum)
 #'
 #'
 NULL
