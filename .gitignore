@@ -40,3 +40,6 @@ vignettes/*.pdf
 
 # Other folders
 working
+
+# Other files
+*.png

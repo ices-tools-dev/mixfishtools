@@ -15,7 +15,7 @@ WGMIXFISH-Advice 2021, North Sea case study.
 data(refTable)
 }
 \description{
-The \code{refTable} dataframe lists stock names and
+The \code{refTable} data.frame lists stock names and
   corresponding colors for consistency across plots. To be used as a look-up
   table in converting between variable stock names and printed ones.
 

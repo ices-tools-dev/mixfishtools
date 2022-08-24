@@ -1,7 +1,7 @@
 #' @name refTable
 #' @title Look-up reference table for stocks and associated attributes
 #'
-#' @description The \code{refTable} dataframe lists stock names and
+#' @description The \code{refTable} data.frame lists stock names and
 #'   corresponding colors for consistency across plots. To be used as a look-up
 #'   table in converting between variable stock names and printed ones.
 #'

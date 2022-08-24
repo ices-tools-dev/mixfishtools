@@ -2,7 +2,8 @@ Package: mixfishtools
 Type: Package
 Title: Contains plot templates used in WGMIXFISH-Advice
 Version: 0.1.0
-Authors@R: c(person("Marc", "Taylor", role=c("aut","cre")))
+Author: Marc Taylor <marc.taylor@thuenen.de>
+Maintainer: Marc Taylor <marc.taylor@thuenen.de>
 Description: To come
 Depends:
     R (>= 4.0),
