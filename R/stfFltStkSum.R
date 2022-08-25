@@ -24,7 +24,7 @@
 #' @format data.frame
 #' @source WGMIXFISH-Advice 2021, North Sea case study.
 #'   \url{[https://github.com/ices-taf/2021_NrS_MixedFisheriesAdvice]}
-#' @usage data(strFltStkSum)
+#' @usage data(stfFltStkSum)
 #' @keywords datasets
 #' @examples
 #'

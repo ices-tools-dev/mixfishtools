@@ -1,5 +1,6 @@
 mixfishtools
 ================
+[![:registry status badge](https://ices-tools-prod.r-universe.dev/badges/mixfishtools)](https://ices-tools-prod.r-universe.dev)
 
 **To install:**
 ```

@@ -83,8 +83,10 @@ plot_relEffortFltStk <- function(data,
       mid = "grey90",
       high = "blue4",
       midpoint = 0) +
-    theme_hc() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 0, vjust = 0.3),
+    # theme_hc() +
+    theme(panel.background = element_blank(),
+      strip.background = element_rect(colour=NA, fill=NA),
+      axis.text.x = element_text(angle = 90, hjust = 0, vjust = 0.3),
       text = element_text(size = 9)) +
     coord_fixed() +
     xlab(xlab) +

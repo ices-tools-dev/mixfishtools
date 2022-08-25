@@ -13,7 +13,7 @@ WGMIXFISH-Advice 2021, North Sea case study.
   \url{[https://github.com/ices-taf/2021_NrS_MixedFisheriesAdvice]}
 }
 \usage{
-data(strFltStkSum)
+data(stfFltStkSum)
 }
 \description{
 The \code{stfFltStkSum} data.frame is an output of
