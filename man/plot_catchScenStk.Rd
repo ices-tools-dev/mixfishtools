@@ -10,9 +10,9 @@ plot_catchScenStk(data, xlab = "Scenario", ylab = "Catch [t]")
 \item{data}{data.frame Contains catch (`catch`) and quota (`quota`) levels
 by scenario (`catch`) and stock (`stock`).}
 
-\item{xlab}{character X-axis label}
+\item{xlab}{character X-axis label (Default: `xlab = "Scenario"`)}
 
-\item{ylab}{character Y-axis label}
+\item{ylab}{character Y-axis label (Default: `ylab = "Catch [t]"`)}
 }
 \value{
 plot output of class ggplot
@@ -20,10 +20,12 @@ plot output of class ggplot
 \description{
 Plot summarizing over- and under-quota catches by stock and
   scenario. Dashed line displays quota by stock. Colored background further
-  emphasizes over- and under-quota catches (under - green, over - red).
+  emphasizes over- and under-quota catches. Used as the headline plot in
+  WGMIXFISH-ADVICE.
 }
 \examples{
 
+# make example data
 data("stfFltStkSum")
 head(stfFltStkSum)
 
@@ -44,9 +46,11 @@ catchScenStk$scenario <- factor(catchScenStk$scenario,
   labels = c("Sq-E", "Max", "Min", "COD-NS"))
 head(catchScenStk)
 
+# plot
 p <- plot_catchScenStk(data = catchScenStk)
 print(p)
 
+# export plot
 # png("catchScenStk1.png", width = 6, height = 5, units = "in", res = 400)
 # print(p); dev.off()
 

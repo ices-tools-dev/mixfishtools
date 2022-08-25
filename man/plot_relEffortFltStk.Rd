@@ -20,47 +20,38 @@ stock (`scenario`).}
 \item{limits}{vector Two value vector with lower and upper limits for fill
 colors (Default: `limits = c(-100,100)`)}
 
-\item{xlab}{character X-axis label}
+\item{xlab}{character X-axis label (Default: `xlab = "Stock"`)}
 
-\item{ylab}{character Y-axis label}
+\item{ylab}{character Y-axis label (Default: `ylab = "Fleet"`)}
 
-\item{fillLegendTitle}{character Fill legend title}
+\item{fillLegendTitle}{character Fill legend title
+(Default: `fillLegendTitle = "Variation in effort"`)}
 }
 \value{
 plot output of class ggplot
 }
 \description{
-Plots the effort required for the uptake of each stock's quota
-  by fleet. Most- (choke), intermediate- and least-limiting stocks are also
-  denoted.
+Plot of relative effort required to uptake each stock's quota
+  by fleet. To be used in fishery overviews.
 }
 \details{
-Users will need to provide the data.table objects to
-  produce the plot. These effort values are presented in terms
-  of percent deviation from status quo effort.
-  In the best case, effort for complete quota uptake by
-  fleet may be derived from scenarios using each restrictive
-  stock one at a time. In the following example, however, these effort
+Users will need to provide the data and reference table objects to
+  produce the plot.
+  In the best case, effort associated with complete quota uptake by
+  fleet may be derived from scenarios restricting fleet catch one
+  stock at a time. In the following example, however, effort
   levels are derived by linearly extrapolating the quota uptake levels
   by the effort of the "min" scenario. This is strictly linear when quotas
   are based on partial F, as in FCube. In FLBEIA, quotas are based on catch
-  (or landings), which may deviate from a linear relationship at close to
-  full exploitation (although not likely to result from an ICES harvest
-  control rule).
+  (or landings), which may deviate from a linear relationship when a stock
+  is close full exploitation (should not result from an ICES harvest control
+  rule).
 }
 \examples{
+# make example data
 
 data(stfFltSum) # summary of fleet-related variables (e.g. effort)
 data(stfFltStkSum) # summary of fleet/stock-related catch variables
-
-# Prepare data
-
-# make data containing effort associated with tac.share uptake by
-# fleet/stock in advice year (`quotaEffort`). Status quo effort also
-# needed for reference (`sqEffort`).
-# For FCube, calculation ofquotaEffort is straightforward given the linear
-# relationship between F and effort. With FLBEIA, the following uses the
-# assumption of a linear relationship between catch and effort
 advYr <- 2022 # advice year
 df <- subset(stfFltStkSum, scenario == "min" & year == advYr)
 eff <- subset(
@@ -84,6 +75,7 @@ df$var <- ifelse(100*(df$relEffort-1) > 100, 100, 100*(df$relEffort-1))
 p <- plot_relEffortFltStk(data = df)
 print(p)
 
+# export plot
 # png("relEffortFltStk1.png", width = 4, height = 6, units = "in", res = 400)
 # print(p); dev.off()
 
