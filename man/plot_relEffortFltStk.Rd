@@ -68,8 +68,11 @@ restr.stks <- c("COD-NS", "HAD", "PLE-EC", "PLE-NS", "POK", "SOL-EC",
   "SOL-NS", "TUR", "WHG-NS", "WIT", "NEP6", "NEP7", "NEP8", "NEP9")
 df <- subset(df, stock \%in\% restr.stks)
 
-# provide limits to max and min values
-df$var <- ifelse(100*(df$relEffort-1) > 100, 100, 100*(df$relEffort-1))
+# convert to percentage change
+df$var <- 100*(df$relEffort-1)
+
+# optional upper limit (e.g. 100)
+df$var <- ifelse(df$var > 100, 100, df$var)
 
 # plot
 p <- plot_relEffortFltStk(data = df)

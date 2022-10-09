@@ -1,3 +1,5 @@
+<img src= "hexSticker/hexSticker_mixfishtools.png" width="150">
+
 mixfishtools
 ================
 [![:registry status badge](https://ices-tools-prod.r-universe.dev/badges/mixfishtools)](https://ices-tools-prod.r-universe.dev)

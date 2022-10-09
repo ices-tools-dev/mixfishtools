@@ -2,5 +2,6 @@
 ^\.Rproj\.user$
 ^README\.Rmd$
 ^LICENSE\.md$
+^hexSticker
 ^working
 ^.png
