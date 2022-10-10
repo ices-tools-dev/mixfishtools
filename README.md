@@ -1,4 +1,4 @@
-<img src= "hexSticker/hexSticker_mixfishtools.png" width="150">
+<img src= "hexSticker/hexSticker_mixfishtools_trans.png" width="150">
 
 mixfishtools
 ================
