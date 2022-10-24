@@ -35,6 +35,7 @@
 #'   levels = c("sq_E", "max", "min", "cod-ns"),
 #'   labels = c("Sq-E", "Max", "Min", "COD-NS"))
 #' head(catchScenStk)
+#' # catchScenStk$catch[which(catchScenStk$scenario == "COD-NS")] <- 0
 #'
 #' # plot
 #' p <- plot_catchScenStk(data = catchScenStk)
@@ -57,7 +58,8 @@ plot_catchScenStk <- function(data,
       mapping = aes(xmin = -Inf, xmax = Inf, ymin = quota, ymax = Inf),
       fill = 'red', alpha = 0.05) +
     geom_hline(mapping = aes(yintercept = quota), lty = 2) +
-    geom_col(width = 0.5) +
+    geom_col(width = 0.5, fill = "grey35", color = "grey35") +
+    # geom_point(colour = "grey35") +
     facet_wrap(~stock, scales = 'free_y') +
     xlab(xlab) +
     ylab(ylab) +

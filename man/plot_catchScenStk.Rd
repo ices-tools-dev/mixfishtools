@@ -45,6 +45,7 @@ catchScenStk$scenario <- factor(catchScenStk$scenario,
   levels = c("sq_E", "max", "min", "cod-ns"),
   labels = c("Sq-E", "Max", "Min", "COD-NS"))
 head(catchScenStk)
+# catchScenStk$catch[which(catchScenStk$scenario == "COD-NS")] <- 0
 
 # plot
 p <- plot_catchScenStk(data = catchScenStk)

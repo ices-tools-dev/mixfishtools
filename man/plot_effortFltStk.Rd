@@ -19,7 +19,7 @@ quotas by fleet and stock, plus designation of each stock's limitation
 status to the fleet's fishing effort. Stock variable names (`Advice_name`)
 should match those of \code{\link[mixfishtools]{refTable}}.
 Other required variables include: `Limitation` - defines, by fleet, the
-most- (`choke`), least- (`least`), and intermediate-limiting (`interm.`)
+most- (`most`), least- (`least`), and intermediate-limiting (`NA`)
 stocks; `effortQuota` - the effort, by fleet, required to take up the
 quota share of each stock; `sqE_effort` - status quo effort corresponding
 to most recent data year before forecast.}
@@ -44,7 +44,7 @@ plot output of class ggplot
 }
 \description{
 Plot of effort required to uptake each stock's quota
-  by fleet. Most- (choke), intermediate- and least-limiting stocks are also
+  by fleet. Most- and least-limiting stocks are also
   denoted. Used in WGMIXFISH-ADVICE.
 }
 \details{
@@ -84,10 +84,10 @@ df2 <- vector("list", length(fls))
 names(df2) <- fls
 for(i in seq(fls)){
   tmp <- subset(df, fleet == fls[i])
-  tmp$Limitation <- "interm." # initial setting to intermediate limitation
-  chokeStk <- subset(tmp, stock \%in\% restr.stks)
-  chokeStk <- chokeStk$stock[which.max(chokeStk$quotaUpt)]
-  tmp$Limitation[which(tmp$stock == chokeStk)] <- "choke"
+  tmp$Limitation <- NA # initial NA setting for all stocks
+  mostLimStk <- subset(tmp, stock \%in\% restr.stks)
+  mostLimStk <- mostLimStk$stock[which.max(mostLimStk$quotaUpt)]
+  tmp$Limitation[which(tmp$stock == mostLimStk)] <- "most"
   leastLimStk <- subset(stfFltStkSum, scenario == "max" & year == advYr &
     fleet == fls[i] & stock \%in\% restr.stks)
   leastLimStk <- leastLimStk$stock[which.min(leastLimStk$quotaUpt)]

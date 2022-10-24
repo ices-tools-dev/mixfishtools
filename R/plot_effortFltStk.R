@@ -1,7 +1,7 @@
 #' Fleet effort to uptake stock quotas
 #'
 #' @description Plot of effort required to uptake each stock's quota
-#'   by fleet. Most- (choke), intermediate- and least-limiting stocks are also
+#'   by fleet. Most- and least-limiting stocks are also
 #'   denoted. Used in WGMIXFISH-ADVICE.
 #'
 #' @param data data.frame Contains information on effort required to uptake
@@ -9,7 +9,7 @@
 #'   status to the fleet's fishing effort. Stock variable names (`Advice_name`)
 #'   should match those of \code{\link[mixfishtools]{refTable}}.
 #'   Other required variables include: `Limitation` - defines, by fleet, the
-#'   most- (`choke`), least- (`least`), and intermediate-limiting (`interm.`)
+#'   most- (`most`), least- (`least`), and intermediate-limiting (`NA`)
 #'   stocks; `effortQuota` - the effort, by fleet, required to take up the
 #'   quota share of each stock; `sqE_effort` - status quo effort corresponding
 #'   to most recent data year before forecast.
@@ -63,10 +63,10 @@
 #' names(df2) <- fls
 #' for(i in seq(fls)){
 #'   tmp <- subset(df, fleet == fls[i])
-#'   tmp$Limitation <- "interm." # initial setting to intermediate limitation
-#'   chokeStk <- subset(tmp, stock %in% restr.stks)
-#'   chokeStk <- chokeStk$stock[which.max(chokeStk$quotaUpt)]
-#'   tmp$Limitation[which(tmp$stock == chokeStk)] <- "choke"
+#'   tmp$Limitation <- NA # initial NA setting for all stocks
+#'   mostLimStk <- subset(tmp, stock %in% restr.stks)
+#'   mostLimStk <- mostLimStk$stock[which.max(mostLimStk$quotaUpt)]
+#'   tmp$Limitation[which(tmp$stock == mostLimStk)] <- "most"
 #'   leastLimStk <- subset(stfFltStkSum, scenario == "max" & year == advYr &
 #'     fleet == fls[i] & stock %in% restr.stks)
 #'   leastLimStk <- leastLimStk$stock[which.min(leastLimStk$quotaUpt)]
@@ -109,7 +109,10 @@ plot_effortFltStk <- function(data, refTable,
     facet_wrap(fleet~., scales = 'free_y', ncol = 3) +
     geom_bar(stat = 'identity', size = 1, alpha = 0.7) +
     geom_hline(data=data, aes(yintercept = sqEffort), lty=2) +
-    scale_color_manual(values = c('red', NA, 'green'), na.value = NA) +
+    scale_color_manual(values = c('green', 'red'), na.value = NA,
+      limits = c('least','most'), labels = c("least", "most (*)")) +
+    geom_text(data = subset(data, Limitation == "most"), aes(label = "*"),
+      vjust = 0.2, show.legend = FALSE) +
     xlab(xlab) +
     ylab(ylab) +
     labs(fill = fillLegendTitle, color = colLegendTitle) +
