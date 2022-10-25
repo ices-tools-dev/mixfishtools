@@ -90,7 +90,7 @@
 #'
 plot_effortFltStk <- function(data, refTable,
   xlab = "Stock", ylab = "KW days ('000)",
-  fillLegendTitle = "Effort stock", colLegendTitle = "Limiting stock"){
+  fillLegendTitle = "Stock", colLegendTitle = "Limiting stock"){
 
   stkFill <- data.frame(stock = unique(data$stock))
   stkFill <- merge(x = stkFill, y = refTable, all.x = TRUE)
@@ -99,7 +99,7 @@ plot_effortFltStk <- function(data, refTable,
   names(stkColors) <- stkFill$Advice_name
 
   stkColorScale <- scale_colour_manual(
-    name = "Effort stock", values = stkColors, aesthetics = c("fill"))
+    name = fillLegendTitle, values = stkColors, aesthetics = c("fill"))
 
   data$Advice_name <- factor(data$Advice_name, levels = stkFill$Advice_name)
 
@@ -115,7 +115,7 @@ plot_effortFltStk <- function(data, refTable,
       vjust = 0.2, show.legend = FALSE) +
     xlab(xlab) +
     ylab(ylab) +
-    labs(fill = fillLegendTitle, color = colLegendTitle) +
+    stkColorScale +
     theme_bw() +
     theme(
       axis.text.x = element_text(angle = -90, hjust = 0, vjust = 0.3, size = 7),
@@ -124,7 +124,8 @@ plot_effortFltStk <- function(data, refTable,
       strip.text = element_text(size = 9)) +
     guides(colour = guide_legend(order = 2),
       fill = guide_legend(order = 1)) +
-    stkColorScale
+    labs(fill = fillLegendTitle, color = colLegendTitle)
+
 
   return(p)
 }

@@ -9,7 +9,7 @@ plot_effortFltStk(
   refTable,
   xlab = "Stock",
   ylab = "KW days ('000)",
-  fillLegendTitle = "Effort stock",
+  fillLegendTitle = "Stock",
   colLegendTitle = "Limiting stock"
 )
 }
