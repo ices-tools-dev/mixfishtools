@@ -4,11 +4,14 @@
 \alias{plot_catchScenStk}
 \title{Headline advice plot}
 \usage{
-plot_catchScenStk(data, xlab = "Scenario", ylab = "Catch [t]")
+plot_catchScenStk(data, adv, xlab = "Scenario", ylab = "Catch [t]")
 }
 \arguments{
-\item{data}{data.frame Contains catch (`catch`) and quota (`quota`) levels
-by scenario (`catch`) and stock (`stock`).}
+\item{data}{data.frame Contains catch (`catch`) by scenario (`scenario`) and
+stock (`stock`).}
+
+\item{adv}{data.frame Contains advice (`advice`) by stock (`stock`). Optional
+upper (`stock`) and lower (`lower`) advice limits can be included.}
 
 \item{xlab}{character X-axis label (Default: `xlab = "Scenario"`)}
 
@@ -29,26 +32,40 @@ Plot summarizing over- and under-quota catches by stock and
 data("stfFltStkSum")
 head(stfFltStkSum)
 
-df <- stfFltStkSum
+# subset data to advice year and restrictive stocks
 advYr <- 2022 # advice year
 restr.stks <- c("COD-NS", "HAD", "PLE-EC", "PLE-NS", "POK", "SOL-EC",
-  "SOL-NS", "TUR", "WHG-NS", "WIT", "NEP6", "NEP7", "NEP8", "NEP9")
+  "SOL-NS", "TUR", "WHG-NS", "WIT")
+stfFltStkSum <- subset(stfFltStkSum, year == advYr & stock \%in\% restr.stks)
 
-df <- subset(df, year == advYr & stock \%in\% restr.stks)
-tmp1 <- aggregate(catch ~ scenario + stock, data = df, FUN = sum)
-tmp2 <- aggregate(quota ~ stock, data = subset(df, scenario == "min"),
-  FUN = sum)
-catchScenStk <- merge(x = tmp1, y = tmp2, all = TRUE)
+# data for plotting (catch by scenario and stock)
+catchScenStk <- aggregate(catch ~ scenario + stock, data = stfFltStkSum, FUN = sum)
 
-# re-label scenarios
+# re-order scenarios (sq_E, max, min, ... )
 catchScenStk$scenario <- factor(catchScenStk$scenario,
   levels = c("sq_E", "max", "min", "cod-ns"),
-  labels = c("Sq-E", "Max", "Min", "COD-NS"))
+  labels = c("sq_E", "max", "min", "cod-ns"))
 head(catchScenStk)
-# catchScenStk$catch[which(catchScenStk$scenario == "COD-NS")] <- 0
 
-# plot
-p <- plot_catchScenStk(data = catchScenStk)
+catchRange <- rbind(
+  data.frame(stock = "COD-NS", advice = 14276, lower = 9701, upper = 14276),
+  data.frame(stock = "HAD", advice = 128708, lower = 111702, upper = 128708),
+  data.frame(stock = "PLE-EC", advice = 6365, lower = 4594, upper = 6365),
+  data.frame(stock = "PLE-NS", advice = 142507, lower = 101854, upper = 195622),
+  data.frame(stock = "POK", advice = 49614, lower = 30204, upper = 49614),
+  data.frame(stock = "SOL-EC", advice = 1810, lower = 1068, upper = 2069),
+  data.frame(stock = "SOL-NS", advice = 15330, lower = 9523, upper = 21805),
+  data.frame(stock = "TUR", advice = 3609, lower = 2634, upper = 4564),
+  data.frame(stock = "WHG-NS", advice = 88426, lower = 70169, upper = 91703),
+  data.frame(stock = "WIT", advice = 1206, lower = 875, upper = 1206)
+)
+
+# plot without range
+p <- plot_catchScenStk(data = catchScenStk, adv = catchRange[,1:2])
+print(p)
+
+# plot with range
+p <- plot_catchScenStk(data = catchScenStk, adv = catchRange)
 print(p)
 
 # export plot

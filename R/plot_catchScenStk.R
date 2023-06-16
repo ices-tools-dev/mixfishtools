@@ -5,8 +5,10 @@
 #'   emphasizes over- and under-quota catches. Used as the headline plot in
 #'   WGMIXFISH-ADVICE.
 #'
-#' @param data data.frame Contains catch (`catch`) and quota (`quota`) levels
-#'   by scenario (`catch`) and stock (`stock`).
+#' @param data data.frame Contains catch (`catch`) by scenario (`scenario`) and
+#'   stock (`stock`).
+#' @param adv data.frame Contains advice (`advice`) by stock (`stock`). Optional
+#'   upper (`stock`) and lower (`lower`) advice limits can be included.
 #' @param xlab character X-axis label (Default: `xlab = "Scenario"`)
 #' @param ylab character Y-axis label (Default: `ylab = "Catch [t]"`)
 #'
@@ -19,51 +21,77 @@
 #' data("stfFltStkSum")
 #' head(stfFltStkSum)
 #'
-#' df <- stfFltStkSum
+#' # subset data to advice year and restrictive stocks
 #' advYr <- 2022 # advice year
 #' restr.stks <- c("COD-NS", "HAD", "PLE-EC", "PLE-NS", "POK", "SOL-EC",
-#'   "SOL-NS", "TUR", "WHG-NS", "WIT", "NEP6", "NEP7", "NEP8", "NEP9")
+#'   "SOL-NS", "TUR", "WHG-NS", "WIT")
+#' stfFltStkSum <- subset(stfFltStkSum, year == advYr & stock %in% restr.stks)
 #'
-#' df <- subset(df, year == advYr & stock %in% restr.stks)
-#' tmp1 <- aggregate(catch ~ scenario + stock, data = df, FUN = sum)
-#' tmp2 <- aggregate(quota ~ stock, data = subset(df, scenario == "min"),
-#'   FUN = sum)
-#' catchScenStk <- merge(x = tmp1, y = tmp2, all = TRUE)
+#' # data for plotting (catch by scenario and stock)
+#' catchScenStk <- aggregate(catch ~ scenario + stock, data = stfFltStkSum, FUN = sum)
 #'
-#' # re-label scenarios
+#' # re-order scenarios (sq_E, max, min, ... )
 #' catchScenStk$scenario <- factor(catchScenStk$scenario,
 #'   levels = c("sq_E", "max", "min", "cod-ns"),
-#'   labels = c("Sq-E", "Max", "Min", "COD-NS"))
+#'   labels = c("sq_E", "max", "min", "cod-ns"))
 #' head(catchScenStk)
-#' # catchScenStk$catch[which(catchScenStk$scenario == "COD-NS")] <- 0
 #'
-#' # plot
-#' p <- plot_catchScenStk(data = catchScenStk)
+#' catchRange <- rbind(
+#'   data.frame(stock = "COD-NS", advice = 14276, lower = 9701, upper = 14276),
+#'   data.frame(stock = "HAD", advice = 128708, lower = 111702, upper = 128708),
+#'   data.frame(stock = "PLE-EC", advice = 6365, lower = 4594, upper = 6365),
+#'   data.frame(stock = "PLE-NS", advice = 142507, lower = 101854, upper = 195622),
+#'   data.frame(stock = "POK", advice = 49614, lower = 30204, upper = 49614),
+#'   data.frame(stock = "SOL-EC", advice = 1810, lower = 1068, upper = 2069),
+#'   data.frame(stock = "SOL-NS", advice = 15330, lower = 9523, upper = 21805),
+#'   data.frame(stock = "TUR", advice = 3609, lower = 2634, upper = 4564),
+#'   data.frame(stock = "WHG-NS", advice = 88426, lower = 70169, upper = 91703),
+#'   data.frame(stock = "WIT", advice = 1206, lower = 875, upper = 1206)
+#' )
+#'
+#' # plot without range
+#' p <- plot_catchScenStk(data = catchScenStk, adv = catchRange[,1:2])
+#' print(p)
+#'
+#' # plot with range
+#' p <- plot_catchScenStk(data = catchScenStk, adv = catchRange)
 #' print(p)
 #'
 #' # export plot
 #' # png("catchScenStk1.png", width = 6, height = 5, units = "in", res = 400)
 #' # print(p); dev.off()
 #'
-plot_catchScenStk <- function(data,
+plot_catchScenStk <- function(data, adv,
   xlab = "Scenario", ylab = "Catch [t]"){
 
-  data$value <- 1 # dummy for drawing background rects
+  adv$scenario <- 1 # dummy variable to allow plotting on facets
 
-  p <- ggplot(data = data, mapping = aes(x = scenario, y = catch)) +
-    geom_rect(stat = "identity",
-      mapping = aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = quota),
-      fill = 'green', alpha = 0.05) +
-    geom_rect( stat = "identity",
-      mapping = aes(xmin = -Inf, xmax = Inf, ymin = quota, ymax = Inf),
-      fill = 'red', alpha = 0.05) +
-    geom_hline(mapping = aes(yintercept = quota), lty = 2) +
+  # add dummy advice range values if missing
+  if(!"upper" %in% names(adv)){
+    adv$upper <- adv$advice
+  }
+  if(!"lower" %in% names(adv)){
+    adv$lower <- adv$advice
+  }
+
+  p <- ggplot(data = data) + aes(x = scenario, y = catch) +
+    facet_wrap(~ stock, scales = 'free_y') +
+    geom_rect(stat = "identity", data = adv,
+      mapping = aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = advice, y = 1),
+      fill = 'green', alpha = 0.25) +
+    geom_rect(stat = "identity", data = adv,
+      mapping = aes(xmin = -Inf, xmax = Inf, ymin = advice, ymax = upper, y = 1),
+      fill = 'yellow', alpha = 0.25) +
+    geom_rect(stat = "identity", data = adv,
+      mapping = aes(xmin = -Inf, xmax = Inf, ymin = upper, ymax = Inf, y = 1),
+      fill = 'red', alpha = 0.25) +
+    geom_hline(data = adv, mapping = aes(yintercept = advice), lty = 1, col = "black") +
+    geom_hline(data = adv, mapping = aes(yintercept = upper), lty = 3) +
+    geom_hline(data = adv, mapping = aes(yintercept = lower), lty = 3) +
     geom_col(width = 0.5, fill = "grey35", color = "grey35") +
-    # geom_point(colour = "grey35") +
-    facet_wrap(~stock, scales = 'free_y') +
-    xlab(xlab) +
-    ylab(ylab) +
     scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+    xlab(label = xlab) +
+    ylab(label = ylab) +
     theme(
       text = element_text(size = 10), legend.position="none",
       axis.text.x = element_text(angle = 90, vjust = 0, hjust=1))
