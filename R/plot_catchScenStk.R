@@ -9,6 +9,8 @@
 #'   stock (`stock`).
 #' @param adv data.frame Contains advice (`advice`) by stock (`stock`). Optional
 #'   upper (`stock`) and lower (`lower`) advice limits can be included.
+#' @param ofwhich logical. If TRUE an 'off which limit' will be plotted.
+#'   Requires a 'catch_ofwhich' column in data and an 'advice_ofwhich' column in adv.
 #' @param xlab character X-axis label (Default: `xlab = "Scenario"`)
 #' @param ylab character Y-axis label (Default: `ylab = "Catch [t]"`)
 #'
@@ -61,7 +63,7 @@
 #' # png("catchScenStk1.png", width = 6, height = 5, units = "in", res = 400)
 #' # print(p); dev.off()
 #'
-plot_catchScenStk <- function(data, adv,
+plot_catchScenStk <- function(data, adv, ofwhich = FALSE,
   xlab = "Scenario", ylab = "Catch [t]"){
 
   adv$scenario <- 1 # dummy variable to allow plotting on facets
@@ -77,18 +79,30 @@ plot_catchScenStk <- function(data, adv,
   p <- ggplot(data = data) + aes(x = scenario, y = catch) +
     facet_wrap(~ stock, scales = 'free_y') +
     geom_rect(stat = "identity", data = adv,
-      mapping = aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = advice, y = 1),
-      fill = 'green', alpha = 0.25) +
+              mapping = aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = advice, y = 1),
+              fill = 'green', alpha = 0.25) +
     geom_rect(stat = "identity", data = adv,
-      mapping = aes(xmin = -Inf, xmax = Inf, ymin = advice, ymax = upper, y = 1),
-      fill = 'yellow', alpha = 0.25) +
+              mapping = aes(xmin = -Inf, xmax = Inf, ymin = advice, ymax = upper, y = 1),
+              fill = 'yellow', alpha = 0.25) +
     geom_rect(stat = "identity", data = adv,
-      mapping = aes(xmin = -Inf, xmax = Inf, ymin = upper, ymax = Inf, y = 1),
-      fill = 'red', alpha = 0.25) +
+              mapping = aes(xmin = -Inf, xmax = Inf, ymin = upper, ymax = Inf, y = 1),
+              fill = 'red', alpha = 0.25) +
+    {if(ofwhich==T) {
+      geom_rect_pattern(stat = "identity", data = adv,
+                        mapping = aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = advice_ofwhich, y = 1),
+                        fill = NA,
+                        pattern = "circle",
+                        pattern_colour = NA,
+                        pattern_fill = "#85AD00") }} +
     geom_hline(data = adv, mapping = aes(yintercept = advice), lty = 1, col = "black") +
     geom_hline(data = adv, mapping = aes(yintercept = upper), lty = 3) +
     geom_hline(data = adv, mapping = aes(yintercept = lower), lty = 3) +
+    {if(ofwhich==T){
+      geom_hline(data = adv, mapping = aes(yintercept = advice_ofwhich), lty = 3, colour = "#85AD00") }} +
     geom_col(width = 0.5, fill = "grey35", color = "grey35") +
+    {if(ofwhich==T){
+      geom_col_pattern(aes(x = scenario, y = catch_ofwhich), pattern = "crosshatch",
+                       width = 0.5, pattern_colour= NA, pattern_fill = "#85AD00") }} +
     scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
     xlab(label = xlab) +
     ylab(label = ylab) +
