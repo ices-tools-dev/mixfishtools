@@ -4,7 +4,13 @@
 \alias{plot_catchScenStk}
 \title{Headline advice plot}
 \usage{
-plot_catchScenStk(data, adv, xlab = "Scenario", ylab = "Catch [t]")
+plot_catchScenStk(
+  data,
+  adv,
+  ofwhich = FALSE,
+  xlab = "Scenario",
+  ylab = "Catch [t]"
+)
 }
 \arguments{
 \item{data}{data.frame Contains catch (`catch`) by scenario (`scenario`) and
@@ -12,6 +18,9 @@ stock (`stock`).}
 
 \item{adv}{data.frame Contains advice (`advice`) by stock (`stock`). Optional
 upper (`stock`) and lower (`lower`) advice limits can be included.}
+
+\item{ofwhich}{logical. If TRUE an 'off which limit' will be plotted.
+Requires a 'catch_ofwhich' column in data and an 'advice_ofwhich' column in adv.}
 
 \item{xlab}{character X-axis label (Default: `xlab = "Scenario"`)}
 
