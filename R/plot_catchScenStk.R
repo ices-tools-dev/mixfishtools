@@ -9,7 +9,7 @@
 #'   stock (`stock`).
 #' @param adv data.frame Contains advice (`advice`) by stock (`stock`). Optional
 #'   upper (`stock`) and lower (`lower`) advice limits can be included.
-#' @param ofwhich logical. If TRUE an 'off which limit' will be plotted.
+#' @param ofwhich logical. If TRUE an of which limit will be plotted.
 #'   Requires a 'catch_ofwhich' column in data and an 'advice_ofwhich' column in adv.
 #' @param xlab character X-axis label (Default: `xlab = "Scenario"`)
 #' @param ylab character Y-axis label (Default: `ylab = "Catch [t]"`)
