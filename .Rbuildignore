@@ -4,8 +4,12 @@
 ^LICENSE\.md$
 ^hexSticker$
 ^working$
+^working/effortPlot$
+^working/hexSticker_figs$
 ^.png$
 
 ^vignettes/cache$
 ^vignettes/tex$
 ^doc$
+
+^Meta$

@@ -1,27 +1,4 @@
----
-title: "WGMIXFISH best practices"
-header-includes:
-- \usepackage{pdflscape}
-- \newcommand{\blandscape}{\begin{landscape}}
-- \newcommand{\elandscape}{\end{landscape}}
-- \usepackage[singlelinecheck=false]{caption}
-output:
-  # rmarkdown::html_vignette:
-  rmarkdown::pdf_document:
-    fig_caption: yes
-    number_sections: true
-    df_print: kable
-    toc: true
-    toc_depth: 3
-    keep_tex: yes
-vignette: >
-  %\VignetteIndexEntry{WGMIXFISH best practices}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
-bibliography: refs.bib
----
-
-```{r setup, include = FALSE}
+## ----setup, include = FALSE---------------------------------------------------
 knitr::opts_chunk$set(
   cache = FALSE, # TRUE for speed. Remember to empty cache after changes to cached R code sections
   cache.path = "cache/", fig.path = "tex/",
@@ -34,89 +11,8 @@ knitr::opts_chunk$set(
 
 library(kableExtra)
 library(dplyr)
-```
 
-# Introduction
-
-This document provides a methodological framework showing decision-making processes and "best practice" recommendations for the implementation of models for mixed fisheries advice. The particular details relating to an ecoregion are specified in the ecoregion's Stock Annex.
-
-# Input Data
-
-## Stocks
-
-The following points are considered for deciding which stocks to include in the models:
-
--   Priority should be given to stocks of commercial importance (i.e. target stocks, managed by TAC). However, bycatch of non-target stocks may also be of interest in a mixed fisheries context.
--   Stocks which are not thought to have a high degree of mixed fisheries interactions due to their ecology or fisheries can be excluded (e.g. pelagic stocks).
--   Specific pelagic stocks should be considered if they account for a significant proportion of the demersal fleet catches (for example, 50% of demersal fleet catch consists of pelagic species in the Iberian Waters model).
--   The number of stocks included in the model also needs to be manageable both computationally and due to the time involved in data processing and model conditioning.
-
-Stock assessment results and the forecast settings used to produce the single stock advice are obtained directly from the stock assessor, advice sheet or WG report. Where relevant, information on the raising procedures for discards and the allocation of age compositions should also be collected. This ensures that the starting point of the mixed fisheries scenarios is the same as for the single stock advice.
-
-*Development steps for best practice:*
-
--   *STARMIXFISH task 8: A framework for adding stocks identified as having important technical interactions*
--   *See Table A1 in Annex 1 for a summary of different options that could be taken.*
-
-## Catch and effort by metier
-
-Data on landings and effort ("fleet data") by year, country, area, metier, vessel length and in the case of landings, species, are requested though the ICES annual fisheries data call. The fleet data received by WGMIXFISH from the ICES annual fisheries data call is run through a QC procedure to identify and resolve data issue with national data submitters. The consistency between the reporting of metiers between the fleet landings and effort data and the landings data available in InterCatch for each stock is assessed and steps are taken to increase consistency where appropriate. The accessions data is merged with the InterCatch data by transferring the discard rates and age structure from InterCatch to the fleet data on a country-metier-area-quarter basis for each stock. However, in some cases, an exact match to an InterCatch record will not be possible. In these cases an alternative match can be made based on a hierarchy of assumptions (example: drop quarter \> mesh \> target \> gear \> area \> country \> everything (i.e. stock level distributions)). The procedure for merging the fleet and InterCatch data is detailed below. This can be done on an age-aggregated or age-disaggregated basis.
-
--   For each stock:
-    a)  Match accessions records to InterCatch metier-level records by: country, metier (gear\*target\*mesh size), area and quarter.
-    b)  If a direct match is not found then assume an average discard rate and/or age structure from InterCatch records matched by: country, metier (gear\*target\*mesh size), area (i.e. drop quarter).
-    c)  Continue matching process using a hierarchy of assumptions (drop mesh \> target \> gear \> area \> country).
-    d)  Use the stock level discard rate and/or age structure where the hierarchy of assumptions fails to make a match.
-
-*Development steps for best practice:*
-
--   *Refine and apply fleet data-InterCatch matching procedure across all ecoregions.*
-
-## Quality checks and diagnostics
-
--   Stock assessment results received from the stock assessor are checked against the ICES Standard Assessment Graphs (SAG) or tables from the WG report.
--   Each landings record in the fleet data should have corresponding effort record. Instances where this criterion is not met are investigated.
--   The merged fleet data are compared to the stock level data received from the stock assessor for: total tonnage, numbers-at-age and sum-of products (SOP, numbers\*mean weight-at-age) for landings, discards and total catch.
-
-# Model conditioning and assumptions
-
-Two models are available for use: Fcube and FLBEIA. The use of FLBEIA allows for an age-disaggregated version as an alternative to using age-aggregated data. Using age-disaggregated catch information at the fleet and métier level allows for differences in selectivity among fleets/métiers. Additionally, FLBEIA offers more flexibility for future changes to methodology. However, in certain circumstances Fcube may be the more appropriate model to use, for example, when the provided age-disaggregated data are questionable or where the dynamics are driven primarily by discarding (due to the way discards are projected in FLBEIA). Additionally, the Cobb-Douglas catch production model used within FLBEIA is not considered suitable in extreme fishing situations (e.g. 0 TAC advice) (@ices_inter-benchmark_2021).
-
-## Stocks -- forecast settings
-
-The settings used in the forecasts that produce the single stock advice are replicated for each fish stock in the mixed fisheries models. These settings relate to mean weight-at-age, selectivity, and recruitment, as well as assumptions on the catch in the intermediate year and basis for advice (MSY approach/Management plan etc). This provides the target catches and forecast stock dynamics under which each mixed fisheries scenario will operate. Single stock "reproduce the advice" forecasting (see "Baseline scenario" section) may be done to ensure consistent translation of these settings to the mixed fishery framework. Future recruitment is conditioned in the models by using fixed value inputs set to match those used to produce the single stock advice. Where single stock advice is produced from stochastic forecasting methods (e.g. using the SAM assessment models for cod, haddock, whiting and sole), the median value from the stochastic projections is used for the fixed recruitment value, as reported in the single stock advice sheets. This however can sometimes lead to small differences as the median of the stochastic projections does not exactly match the deterministic forecast from the median of the assessment outputs. Generally, these are within a few percent. Nephrops functional units are conditioned using a fixed dynamics approach meaning that there is no feedback mechanism between the catches taken and the population abundance (i.e. catches in the advice year are not influenced by population changes arising from catches in the intermediate year). Only functional units with an annual abundance estimate derived from UWTV surveys are subject to the fleet effort restriction rules set in the mixed fisheries scenarios.
-
-*Development for best practice:*
-
--   *Develop methods for category 3/trend-based stocks.*
--   *Aim to move to a, preferably age-based, FLBEIA model in all ecoregions.*
-
-## Defining fleets and metiers
-
-### Definition
-
-Two basic concepts are of primary importance when dealing with mixed-fisheries, the Fleet (or fleet segment), and the Métier. Their definition has evolved with time, but the most recent official definitions are those from the CEC's Data Collection Framework (DCF, Reg. (EC) No949/2008), which we adopt here:
-
--   A Fleet segment is a group of vessels with the same length class and predominant fishing gear during the year. Vessels may have different fishing activities during the reference period, but might be classified in only one fleet segment.
--   A Métier is a group of fishing operations targeting a similar (assemblage of) species, using similar gear, during the same period of the year and/or within the same area and which are characterized by a similar exploitation pattern.
-
-Table A2 in Annex 1 summarises the different options that could be taken to use define the model basis for fisheries, fleets and metiers in the mixed fisheries models. The current approach used in all the mixed fisheries models is the fleet and metier-based approach. Initially, fleets are defined using country, gear group and vessel length. Metiers are defined using combinations of gear, target assemblage, mesh size and area. Currently, there is not a standardized way to define the fleets and metiers and so each ecoregion has developed its own approach by considering the following:
-
--   Matching DCF métiers with definitions used in the cod long-term management plan (e.g. North Sea).
--   Consider if separation of fleets over vessel length is necessary.
--   Consider combining across gear groupings which have similar catch profiles.
--   Consider combining countries which only account for a small proportion of the catch (e.g. Bay of Biscay - countries other than Spain and France are grouped together).
--   Combine metiers across ICES divisions which are often combined for sampling, management and advice purposes (e.g. Celtic Sea).
--   Consider conducting a clustering analysis (or similar) to characterise the fishery and ascertain if fleets/metiers with similar data/interactions can be merged.
--   Consider compatibility with other datasets (e.g. STECF for economic data) or with regulations/technical measures.
--   Opinion of fisheries experts for the ecoregion.
-
-The initial fleet definitions often result in a large number of fleets and metiers, many of which will likely only represent very small amounts of the total catch for each stock. Therefore, to reduce the complexity of the model a threshold is defined to combine smaller fleets/metiers into an "other" category (Table 1). It is recommended that a sensitivity analysis is conducted when deciding on a threshold value. As such, different threshold values are used across the ecoregions.
-
-The initial fleet definitions often result in a large number of fleets and metiers, many of which will likely only represent very small amounts of the total catch for each stock. Therefore, to reduce the complexity of the model a threshold is defined to combine smaller fleets/metiers into an "other" category (Table 1). It is recommended that a sensitivity analysis is conducted when deciding on a threshold value. As such, different threshold values are used across the ecoregions.
-
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+## ----echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE--------------
 df <- as.data.frame(rbind(
   c('North Sea', 
     'Métiers that fail to catch at least 1\\% of the total landings of any stock, in the data year', 
@@ -139,11 +35,8 @@ column_spec(1:3, width = paste0(c(3,6,6), "cm")) |>
 kable_styling(latex_options = "striped") |> 
 kable_styling(latex_option = c("hold_position"), position = "left")  |> 
 row_spec(seq(nrow(df)-1), hline_after = T)
-```
 
-Table 2 summarises all the approaches used to define the fleets for each ecoregion.
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+## ----echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE--------------
 df <- as.data.frame(rbind(
 c('North Sea',
     
@@ -216,21 +109,8 @@ kable_styling(latex_options = "striped") |>
 kable_styling(latex_option = c("hold_position",  "repeat_header"), 
   position = "left") |>
 row_spec(seq(nrow(df)-1), hline_after = T)
-```
 
-
-*Development for best practice:*
-
-- *Each ecoregion should aim to produce a list of final fleet definitions which provides enough relevant detail within the smallest number of fleets (annually reported in WGMIXFISH-ADVICE report).*
-- *Consider implementing a consistent approach for catch-no-effort and effort-no-catch records in the fleet data.*
-- *Implement a consistent approach for small fleets and metiers across all ecoregions including naming convention. Consider conducting a sensitivity analysis for defining the threshold.*
-- *More long term, develop a procedure for finding the optimal level aggregation of fleet/metier definitions (see @moore_defining_2019).* 
-
-### Consistency of total fleet catches with stock assessment
-Often there are “missing” catches within an ecoregion which need to be accounted for to ensure that the total removals used as input to the mixed fisheries model is the same as the single stock assessments.  Sometimes, these “missing” catches result either where fleet data that has not been submitted or is incomplete (e.g. missing specific fleet segments). Other times these “missing” catches become evident when a stock is widely distributed and a significant portion of a stock’s catch occurs outside of the ecoregion (e.g. hake in Bay of Biscay). The magnitude of the missing catches per stock is obtained by comparing the total catches from the fleet data to the total catches from the stock assessment. The approach taken to account for differences in the total catches is to allocate these catches to a pseudo fleet (details given in Table 3).
-
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+## ----echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE--------------
 df <- as.data.frame(rbind(
   c('North Sea', 
     'Specific fleet segments (<15 m) not submitted by Norway. Added to OTH\\_OTH fleet.', 
@@ -259,72 +139,8 @@ column_spec(1:3, width = paste0(c(3,6,6), "cm")) |>
 kable_styling(latex_options = "striped") |> 
 kable_styling(latex_option = c("hold_position", "repeat_header"), position = "left")  |> 
 row_spec(seq(nrow(df)-1), hline_after = T)
-```
 
-
-*Development for best practice:*
-
--	*Implement consistent approach for “missing” catches (e.g. out of area catches) across all ecoregions.*
--	*Scaling down procedure (implement use of estimated values in stock objects and develop a (scaling) procedure to unifying estimated values with observed values (e.g. Intercatch/Accessions data) used in conditioning fleets.)*
-
-
-##	Fleet behaviour
-
-Fleet behaviour in the mixed fisheries model is assumed to be similar to the recent past (last 3 years except for North Sea which is the last data year) as observed in the fleet data. 
-
-Fleet behaviour encompasses:
-
--	Effort allocation per metier within a fleet. 
--	Catchability (catch efficiency) per metier and species. 
--	Gear selectivity per metier and species (age-based models only)
--	Quota share per fleet (typically based on historic landings share)
-
-
-Different modelling approaches for each of these parameters are described in Tables A3-A5 in Annex 1 which could be explored in future. 
-
-The TAC used for the intermediate year and advice year are taken from the last single species advice issued for each stock. The TACs are shared between the fleets using the assumption made on the quota share per fleet.  TACs for Nephrops norvegicus sometimes need to be split between ecoregions (e.g. Celtic and Irish Sea ecoregion, using average proportions of landings since 2000) and between Functional Units (using the most recent data year’s proportions of landings).
-
-*Development for best practice:*
-
--	*Implement consistency in the time period used to calculate average fleet behaviour parameters. Consider using a shorter time period when strong trends exist in the historic data and develop procedure if necessary.*
--	*Explore different options for quota share per fleet (e.g. use of post quota swaps instead of landings shares).*
--	*Define maximum fleet effort (e.g. multiple of status quo) as an upper limit in scenarios. *
--	*Explore quota share grouping setting in FLBEIA for Nephrops FU.*
--	*Assess sensitivity of projections to fleet and metier definitions (STARMIXFISH)*
--	*Assess sensitivity of projections to uncertainties in input parameters (catchability, effort share among a fleet’s metiers, quota share among fleets, selectivity) (STARMIXFISH)*
--	*Develop hindcasting methods to assess predictive capacity and uncertainty/sensitivity analysis*
-*	*Consider adding runs of many stock-specific scenarios as a diagnostic to help reveal issues (through unrealistic results) in the model setup.*
-
-##	Quality checks and diagnostics
-
--	Compare total catches/catches-at-age for each stock from the fleets to the stock assessment. 
--	Compare total F-at-age for each stock from the fleets to the stock assessment. 
--	Check that the “OTH”/”MIS” fleets account for a small percentage of total catches. 
--	Plot trends in catches by stock for each fleet/metier. 
--	Check for strong trends in catchability/catchability-at-age and effort (total and effort share). 
--	Plot fleet-level forecast values used in the context of the data time series.
--	Compare stock-level forecast values against single stock advice values.
-
-
-# Scenarios
-
-##	Baseline scenario (Reproduce the advice)
-
-The baseline scenario reproduces the single stock advice within the mixed fisheries models. This acts as a quality check on the model conditioning in addition to providing a reference baseline for the mixed fisheries scenarios. This scenario is conducted in two ways. The first is designed to quantify the differences in catch advice arising from using a different forecasting method to that used to produce the single stock advice. These differences are expected to be larger when dealing with stocks that have sex- or season-separated and/or multi-fleet assessments and forecasts. Furthermore, reproduce the advice forecasts are currently deterministic, which will differ from stochastic assessment model forecasts. The second type of reproduce the advice tests the ability of the mixed fisheries (i.e. fleet based) model framework to reproduce the advice. 
-
-
-*Development for best practice:*
-
--	*Implement the second method (RTA in mixed fisheries model) in all ecoregions (done by BoB, IW, and NS).*
-
-##	Mixed fisheries scenarios
-
-The mixed fisheries scenarios start with projecting the intermediate year. The same intermediate assumption of status quo effort (average effort per fleet for the last 3 years, except for North Sea where it is equal to effort in the last data year) is used in all the mixed fisheries scenarios. However, for pseudo fleets catching only pelagic stocks, it may be more appropriate to follow the intermediate year assumptions made by the relevant assessment working group. 
-
-For the advice year, each mixed fisheries scenario applies a different rule on when a fleet ceases all fishing activity (see Table 4). This restriction is dependent on each fleet’s share of the fishing opportunities for each stock (“stock share”). The rules applied in each scenario are described in the table below. The scenario rules are not applied to any pseudo fleets (pseudo fleets are included in the model to account for either pelagic fleet catches or catches taken outside of the ecoregion area). It is assumed that the pseudo fleets fill their quota share regardless of the scenario rule applied to the true fleets. Possible alternative scenario modelling approaches are detailed in Table A6 in Annex 1.
-
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+## ----echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE--------------
 df <- as.data.frame(rbind(
   c('Maximum (“max”)', 
     'For each fleet, fishing in the advice year stops when all stock shares of that fleet have been caught.', 
@@ -353,35 +169,8 @@ column_spec(1:3, width = paste0(c(3,6,6), "cm")) |>
 kable_styling(latex_options = "striped") |> 
 kable_styling(latex_option = c("hold_position", "repeat_header"), position = "left")  |> 
 row_spec(seq(nrow(df)-1), hline_after = T)
-```
 
-
-*Development for best practice:*
-
--	*Refine and implement a Range/Min scenario across all ecoregions.*
--	*Implement a consistent approach to the effort assumption for fleets that do not have any fishing opportunities for the stock specified in the single stock focussed scenario.*
--	*Define a best practice approach for deciding on which single-stock-focussed scenarios should be included in the advice sheet.*
--	*Define a process for running other scenarios of interest (e.g. Feco, intermediate scenarios for zero-advice/vulnerable stocks)*
-
-## Quality checks and diagnostics
-
--	Baseline scenario: compare intermediate and advice year results: SSB, F, catch, landings, discards. Investigate discrepancies. Target tolerance is 5%, but within 10% is acceptable if there is a clear explanation for the discrepancy. 
--	Mixed fisheries scenarios: compare intermediate year results: SSB, F, catch, landings, discards to single stock advice values.
--	Mixed fisheries scenarios: compare intermediate year assumed catches to actual catches (retrospective comparison).
-
-# References
-
-<div id="refs"></div>
-
-\newpage
-\blandscape
-
-# Annex 1
-
-\renewcommand{\thetable}{A\arabic{table}}
-\setcounter{table}{0}
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+## ----echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE--------------
 df <- as.data.frame(rbind(
   c('Description', 
     'Only those stocks that have a full category 1 assessment with age-based or size-based population dynamics or an absolute abundance estimate (e.g., Nephrops) are included.',
@@ -429,11 +218,8 @@ column_spec(1:5, width = paste0(c(2.5, rep(18/4, 4)), "cm")) |>
 kable_styling(latex_options = "striped") |> 
 kable_styling(latex_option = c("hold_position", "repeat_header"), position = "left")  |> 
 row_spec(seq(nrow(df)-1), hline_after = T)
-```
 
-\newpage
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+## ----echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE--------------
 df <- as.data.frame(rbind(
   c('Description',
     'The operational unit in the model is a “fleet”, that is a physical group of vessels with a predominant activity (e.g., Dutch beam trawlers of 24-40m). A vessel belongs to only one fleet.',
@@ -477,11 +263,8 @@ column_spec(1:4, width = paste0(c(2.5, rep(18/3, 3)), "cm")) |>
 kable_styling(latex_options = "striped") |> 
 kable_styling(latex_option = c("hold_position", "repeat_header"), position = "left")  |> 
 row_spec(seq(nrow(df)-1), hline_after = T)
-```
 
-\newpage
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+## ----echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE--------------
 df <- as.data.frame(rbind(
   c('Description',
     'No adaptation of fleets to quotas,',
@@ -527,11 +310,8 @@ column_spec(1:6, width = paste0(c(2.5, rep(18/5, 5)), "cm")) |>
 kable_styling(latex_options = "striped") |> 
 kable_styling(latex_option = c("hold_position", "repeat_header"), position = "left")  |> 
 row_spec(seq(nrow(df)-1), hline_after = T)
-```
 
-\newpage
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+## ----echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE--------------
 df <- as.data.frame(rbind(
   c('Description',
     'Fixed selectivity for each fleet and métier based on recent past observation,',
@@ -573,11 +353,8 @@ column_spec(1:6, width = paste0(c(2.5, rep(18/3, 3)), "cm")) |>
 kable_styling(latex_options = "striped") |> 
 kable_styling(latex_option = c("hold_position", "repeat_header"), position = "left")  |> 
 row_spec(seq(nrow(df)-1), hline_after = T)
-```
 
-\newpage
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+## ----echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE--------------
 df <- as.data.frame(rbind(
   c('Description',
     'The share of each fleets quota is based on its (recent) past observed share.',
@@ -615,12 +392,8 @@ column_spec(1:5, width = paste0(c(2.5, rep(18/4, 4)), "cm")) |>
 kable_styling(latex_options = "striped") |> 
 kable_styling(latex_option = c("hold_position", "repeat_header"), position = "left")  |> 
 row_spec(seq(nrow(df)-1), hline_after = T)
-```
 
-
-\newpage
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+## ----echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE--------------
 df <- as.data.frame(rbind(
   c('All fleets stop fishing when they reach any quota (min scenario), all quotas (max scenario) or a defined stock quota,',
     'Fleets stop fishing when they reach their quota for a selected set of stocks for that fleet (min) scenario, or all quotas of those stocks (max scenario),',
@@ -654,8 +427,4 @@ column_spec(1:4, width = paste0(c(2.5, rep(18/3, 3)), "cm")) |>
 kable_styling(latex_options = "striped") |> 
 kable_styling(latex_option = c("hold_position", "repeat_header"), position = "left")  |> 
 row_spec(seq(nrow(df)-1), hline_after = T)
-```
 
-
-\elandscape
-\newpage

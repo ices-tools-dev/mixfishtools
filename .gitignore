@@ -48,3 +48,6 @@ vignettes/tex/
 *.png
 !/hexsticker/*.png
 
+inst/doc
+
+/Meta/
