@@ -40,6 +40,9 @@ vignettes/*.pdf
 
 # Other folders
 working
+vignettes/cache/
+vignettes/tex/
+
 
 # Other files
 *.png
