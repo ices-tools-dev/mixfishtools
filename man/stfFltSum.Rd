@@ -10,7 +10,7 @@ data.frame
 }
 \source{
 WGMIXFISH-Advice 2021, North Sea case study.
-  \url{[https://github.com/ices-taf/2021_NrS_MixedFisheriesAdvice]}
+  (https://github.com/ices-taf/2021_NrS_MixedFisheriesAdvice)
 }
 \usage{
 data(stfFltSum)
