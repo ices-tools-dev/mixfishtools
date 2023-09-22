@@ -17,7 +17,7 @@ plot_catchScenStk(
 stock (`stock`).}
 
 \item{adv}{data.frame Contains advice (`advice`) by stock (`stock`). Optional
-upper (`stock`) and lower (`lower`) advice limits can be included.}
+upper (`upper`) and lower (`lower`) advice limits can be included.}
 
 \item{ofwhich}{logical. If TRUE an of which limit will be plotted.
 Requires a 'catch_ofwhich' column in data and an 'advice_ofwhich' column in adv.}
