@@ -15,6 +15,7 @@
 #' @param ylab character Y-axis label (Default: `ylab = "Catch [t]"`)
 #'
 #' @return plot output of class ggplot
+#' @import ggplot2
 #' @export
 #'
 #' @examples

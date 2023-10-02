@@ -37,6 +37,7 @@
 #'   rule).
 #'
 #' @return plot output of class ggplot
+#' @import ggplot2
 #' @export
 #'
 #' @examples
