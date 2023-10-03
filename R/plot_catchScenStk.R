@@ -21,7 +21,7 @@
 #' @examples
 #'
 #' # make example data
-#' data("stfFltStkSum")
+#' data(stfFltStkSum)
 #' head(stfFltStkSum)
 #'
 #' # subset data to advice year and restrictive stocks

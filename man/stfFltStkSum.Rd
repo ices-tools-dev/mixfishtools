@@ -21,7 +21,7 @@ The \code{stfFltStkSum} data.frame is an output of
   `plot_effortFltStk`.
 
 \itemize{
-  \item scenario - advice year
+  \item scenario - advice scenario
   \item year - advice year
   \item fleet - fleet names
   \item stock - stock names used in mixed fishery model
