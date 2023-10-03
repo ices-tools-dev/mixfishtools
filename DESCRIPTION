@@ -8,14 +8,16 @@ Description: Contains plot templates used in WGMIXFISH-ADVICE and Fisheries
   Overviews
 Depends:
     R (>= 4.0),
-    ggplot2
+    ggplot2,
+    htmlwidgets,
+    networkD3
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: false
 RoxygenNote: 7.2.3
 Suggests: 
     knitr,
-    kableextra,
+    kableExtra,
     dplyr,
     rmarkdown
 VignetteBuilder: knitr
