@@ -1,13 +1,13 @@
 #' Plot fleet landings relative to recent landings / quota
 #'
-#' @description Plot of a fleets landings difference from the recent landing or the quota.
+#' @description Plot of a fleets catch difference from the recent catches or the quota.
 #'   By fleet. Most- and least-limiting stocks are also
 #'   denoted. Testing in response to WKMIXFISH2.
 #'
-#' @param data data.frame Contains information on landings by fleet and stock
-#' @param basis is a character vector with the basis on which to compare the scenario landings, either 'recent_landings' or 'quota'
-#' @param dataYrs is a vector of years on which to base recent landings, not needed for 'quota' option
-#' @param advYr is a vector of the year in which the scenario landings are generated.
+#' @param data data.frame Contains information on catch by fleet and stock
+#' @param basis is a character vector with the basis on which to compare the scenario landings, either 'recent_catch' or 'Quota'
+#' @param dataYrs is a vector of years on which to base recent catches, not needed for 'quota' option
+#' @param advYr is a vector of the year in which the scenario catches are generated.
 #' @param sc is a vector with the scenario to plot, e.g. "min"
 #' @param fleets_excl is a vector of fleet names not to plot, e.g. "OTH_OTH"
 #' @param refTable data.frame Contains stock look-up information for consistent
@@ -36,7 +36,7 @@
 #' advYr <- 2022 # advice year
 #'
 #'plot_catch_change(data = stfFltStkSum, 
-#'                  basis = "recent_landings", 
+#'                  basis = "recent_catch", 
 #'                  dataYrs = 2020:2022, 
 #'                 TACYr = 2023, 
 #'                 sc = "min", 
@@ -48,14 +48,14 @@
 #'                  colLegendTitle = "Limiting stock")
 #'
 plot_catch_change <- function(data = NULL, 
-                              basis = "recent_landings", 
+                              basis = "recent_catch", 
                               dataYrs = NULL, 
                               advYr = NULL, 
                               sc = "min", 
                               fleets_excl = NULL,
                               refTable = NULL,
                               xlab = "Stock", 
-                              ylab = "landings change (tonnes)",
+                              ylab = "catch change (tonnes)",
                               fillLegendTitle = "Stock", 
                               colLegendTitle = "Limiting stock") {
 
@@ -63,15 +63,15 @@ require(dplyr)
 require(ggplot2)
     
 ## Compute the baseline
-if(basis=="recent_landings") {
-base <- filter(data, scenario=="min", year %in% dataYrs, !fleet %in% fleets_excl) %>% 
+if(basis=="recent_catch") {
+base <- filter(data, scenario==sc, year %in% dataYrs, !fleet %in% fleets_excl) %>% 
   group_by(fleet, stock) %>% 
-  summarise(landings = mean(landings, na.rm = TRUE))
+  summarise(catch = mean(catch, na.rm = TRUE))
 }
 if(basis=="Quota") {
-  base <- filter(data, scenario==sc, year %in% dataYrs, !fleet %in% fleets_excl) %>% 
-    group_by(fleet, stock) %>% mutate(landings=quota) %>% 
-    summarise(landings = mean(landings, na.rm = TRUE))
+  base <- filter(data, scenario==sc, year %in% advYr, !fleet %in% fleets_excl) %>% 
+    group_by(fleet, stock) %>% select(-catch) %>% rename(catch=quota) %>% 
+    summarise(catch = mean(catch, na.rm = TRUE))
 }
 
 ## The scenario projection
@@ -80,7 +80,7 @@ proj <- filter(data, scenario == sc, year == advYr) %>%
   
 
 ## Add the projection and the choke stock  
-base$proj <- proj$landings[match(paste0(base$fleet, base$stock),
+base$proj <- proj$catch[match(paste0(base$fleet, base$stock),
                                  paste0(proj$fleet, proj$stock))]
 
 base$proj[is.nan(base$proj) | is.na(base$proj)] <- 0
@@ -97,13 +97,13 @@ base$choke <- proj$choke_rev[match(paste0(base$fleet, base$stock),
 
 
 ## Compute the difference
-base$diff <- base$proj - base$landings  
+base$diff <- base$proj - base$catch  
 
 ## Plot 
 ## Order the facets by most landings to least landings
 fac_ord <- base %>% group_by(fleet) %>%
   summarise(diff = sum(diff))
-flt_ord <- c(fac_ord[order(fac_ord$diff),"fleet"] %>% as.data.frame())$fleet
+flt_ord <- c(fac_ord[order(-abs(fac_ord$diff)),"fleet"] %>% as.data.frame())$fleet
 
 ## Add the colours
 stkFill <- data.frame(stock = unique(data$stock))
