@@ -80,21 +80,21 @@ plot_catchScenStk <- function(data, adv, ofwhich = FALSE,
   p <- ggplot(data = data) + aes(x = scenario, y = catch) +
     facet_wrap(~ stock, scales = 'free_y') +
     geom_rect(stat = "identity", data = adv,
-              mapping = aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = advice, y = 1),
-              fill = 'green', alpha = 0.25) +
+      mapping = aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = advice, y = 1),
+      fill = 'green', alpha = 0.25) +
     geom_rect(stat = "identity", data = adv,
-              mapping = aes(xmin = -Inf, xmax = Inf, ymin = advice, ymax = upper, y = 1),
-              fill = 'yellow', alpha = 0.25) +
+      mapping = aes(xmin = -Inf, xmax = Inf, ymin = advice, ymax = upper, y = 1),
+      fill = 'yellow', alpha = 0.25) +
     geom_rect(stat = "identity", data = adv,
-              mapping = aes(xmin = -Inf, xmax = Inf, ymin = upper, ymax = Inf, y = 1),
-              fill = 'red', alpha = 0.25) +
+      mapping = aes(xmin = -Inf, xmax = Inf, ymin = upper, ymax = Inf, y = 1),
+      fill = 'red', alpha = 0.25) +
     {if(ofwhich==T) {
       geom_rect_pattern(stat = "identity", data = adv,
-                        mapping = aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = advice_ofwhich, y = 1),
-                        fill = NA,
-                        pattern = "circle",
-                        pattern_colour = NA,
-                        pattern_fill = "#85AD00") }} +
+        mapping = aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = advice_ofwhich, y = 1),
+        fill = NA,
+        pattern = "circle",
+        pattern_colour = NA,
+        pattern_fill = "#85AD00") }} +
     geom_hline(data = adv, mapping = aes(yintercept = advice), lty = 1, col = "black") +
     geom_hline(data = adv, mapping = aes(yintercept = upper), lty = 3) +
     geom_hline(data = adv, mapping = aes(yintercept = lower), lty = 3) +
@@ -103,7 +103,7 @@ plot_catchScenStk <- function(data, adv, ofwhich = FALSE,
     geom_col(width = 0.5, fill = "grey35", color = "grey35") +
     {if(ofwhich==T){
       geom_col_pattern(aes(x = scenario, y = catch_ofwhich), pattern = "crosshatch",
-                       width = 0.5, pattern_colour= NA, pattern_fill = "#85AD00") }} +
+        width = 0.5, pattern_colour= NA, pattern_fill = "#85AD00") }} +
     scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
     xlab(label = xlab) +
     ylab(label = ylab) +
