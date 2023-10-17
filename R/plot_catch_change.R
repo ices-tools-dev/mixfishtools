@@ -77,16 +77,9 @@ if(basis=="Quota") {
 }
 
 ## The scenario projection
-<<<<<<< HEAD
 proj <- filter(data, scenario == sc, year == advYr, !fleet %in% fleets_excl) %>%
     group_by(fleet, stock, choke) 
   
-=======
-proj <- filter(data, scenario == sc, year == advYr) %>%
-    group_by(fleet, stock, choke)
->>>>>>> 46f373086ad475e6d6d7d52ea96b3ccee4ae7b61
-
-
 ## Add the projection and the choke stock
 base$proj <- proj$catch[match(paste0(base$fleet, base$stock),
                                  paste0(proj$fleet, proj$stock))]
