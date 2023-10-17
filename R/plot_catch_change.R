@@ -75,7 +75,7 @@ if(basis=="Quota") {
 }
 
 ## The scenario projection
-proj <- filter(data, scenario == sc, year == advYr) %>%
+proj <- filter(data, scenario == sc, year == advYr, !fleet %in% fleets_excl) %>%
     group_by(fleet, stock, choke) 
   
 
