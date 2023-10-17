@@ -92,9 +92,9 @@ base$proj[is.nan(base$proj) | is.na(base$proj)] <- 0
 
 proj$quotaUpt <- ifelse(proj$tac==0 & proj$tacshare>0, "choke", proj$choke)
 
-proj <- proj %>% group_by(fleet) %>% mutate(choke_rev = case_when(quotaUpt == max(quotaUpt) ~ "choke",
-  quotaUpt == min(quotaUpt) ~ "least",
-  quotaUpt != max(quotaUpt) | quotaUpt != min(quotaUpt) ~ "intermediate"
+proj <- proj %>% group_by(fleet) %>% mutate(choke_rev = case_when(quotaUpt == max(quotaUpt, na.rm = TRUE) ~ "choke",
+  quotaUpt == min(quotaUpt, na.rm = TRUE) ~ "least",
+  quotaUpt != max(quotaUpt, na.rm = TRUE) | quotaUpt != min(quotaUpt, na.rm = TRUE) ~ "intermediate"
 ))
 
 base$choke <- proj$choke_rev[match(paste0(base$fleet, base$stock),
