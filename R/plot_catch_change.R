@@ -88,6 +88,10 @@ base$proj[is.nan(base$proj) | is.na(base$proj)] <- 0
 
 ## Add the choke, least and intermediate
 
+## Case of zero-tac advice
+
+proj$quotaUpt <- ifelse(proj$tac==0 & proj$tacshare>0, "choke", proj$choke)
+
 proj <- proj %>% group_by(fleet) %>% mutate(choke_rev = case_when(quotaUpt == max(quotaUpt) ~ "choke",
   quotaUpt == min(quotaUpt) ~ "least",
   quotaUpt != max(quotaUpt) | quotaUpt != min(quotaUpt) ~ "intermediate"
