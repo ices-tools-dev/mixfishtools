@@ -24,9 +24,11 @@
 #' @details Users will need to provide the data and reference table objects to
 #'   produce the plot.
 #'
-#' @return plot output of class ggplot
-#' @import ggplot2, dplyr
+#' @import ggplot2
+#' @import dplyr
 #' @export
+#'
+#' @return plot output of class ggplot
 #'
 #' @examples
 #'
@@ -35,51 +37,57 @@
 #' data(stfFltStkSum) # summary of fleet/stock-related catch variables
 #' advYr <- 2022 # advice year
 #'
-#'plot_catch_change(data = stfFltStkSum, 
-#'                  basis = "recent_catch", 
-#'                  dataYrs = 2020:2022, 
-#'                 TACYr = 2023, 
-#'                 sc = "min", 
-#'                 fleets_excl = "OTH_OTH",
-#'                 refTable = refTable,
-#'                 xlab = "Stock", 
-#'                  ylab = "landings change (tonnes)",
-#'                 fillLegendTitle = "Stock", 
-#'                  colLegendTitle = "Limiting stock")
+#' plot_catch_change(data = stfFltStkSum,
+#'  basis = "recent_catch",
+#'  dataYrs = 2020:2022,
+#'  advYr = advYr,
+#'  sc = "min",
+#'  fleets_excl = "OTH_OTH",
+#'  refTable = refTable,
+#'  xlab = "Stock",
+#'  ylab = "landings change (tonnes)",
+#'  fillLegendTitle = "Stock",
+#'  colLegendTitle = "Limiting stock")
 #'
-plot_catch_change <- function(data = NULL, 
-                              basis = "recent_catch", 
-                              dataYrs = NULL, 
-                              advYr = NULL, 
-                              sc = "min", 
-                              fleets_excl = NULL,
-                              refTable = NULL,
-                              xlab = "Stock", 
-                              ylab = "catch change (tonnes)",
-                              fillLegendTitle = "Stock", 
-                              colLegendTitle = "Limiting stock") {
+plot_catch_change <- function(data = NULL,
+  basis = "recent_catch",
+  dataYrs = NULL,
+  advYr = NULL,
+  sc = "min",
+  fleets_excl = NULL,
+  refTable = NULL,
+  xlab = "Stock",
+  ylab = "catch change (tonnes)",
+  fillLegendTitle = "Stock",
+  colLegendTitle = "Limiting stock") {
 
-require(dplyr)
-require(ggplot2)
-    
+# require(dplyr)
+# require(ggplot2)
+
 ## Compute the baseline
 if(basis=="recent_catch") {
-base <- filter(data, scenario==sc, year %in% dataYrs, !fleet %in% fleets_excl) %>% 
-  group_by(fleet, stock) %>% 
+base <- filter(data, scenario==sc, year %in% dataYrs, !fleet %in% fleets_excl) %>%
+  group_by(fleet, stock) %>%
   summarise(catch = mean(catch, na.rm = TRUE))
 }
 if(basis=="Quota") {
-  base <- filter(data, scenario==sc, year %in% advYr, !fleet %in% fleets_excl) %>% 
-    group_by(fleet, stock) %>% select(-catch) %>% rename(catch=quota) %>% 
+  base <- filter(data, scenario==sc, year %in% advYr, !fleet %in% fleets_excl) %>%
+    group_by(fleet, stock) %>% select(-catch) %>% rename(catch=quota) %>%
     summarise(catch = mean(catch, na.rm = TRUE))
 }
 
 ## The scenario projection
+<<<<<<< HEAD
 proj <- filter(data, scenario == sc, year == advYr, !fleet %in% fleets_excl) %>%
     group_by(fleet, stock, choke) 
   
+=======
+proj <- filter(data, scenario == sc, year == advYr) %>%
+    group_by(fleet, stock, choke)
+>>>>>>> 46f373086ad475e6d6d7d52ea96b3ccee4ae7b61
 
-## Add the projection and the choke stock  
+
+## Add the projection and the choke stock
 base$proj <- proj$catch[match(paste0(base$fleet, base$stock),
                                  paste0(proj$fleet, proj$stock))]
 
@@ -88,18 +96,18 @@ base$proj[is.nan(base$proj) | is.na(base$proj)] <- 0
 ## Add the choke, least and intermediate
 
 proj <- proj %>% group_by(fleet) %>% mutate(choke_rev = case_when(quotaUpt == max(quotaUpt) ~ "choke",
-                                                                  quotaUpt == min(quotaUpt) ~ "least",
-                                                                  quotaUpt != max(quotaUpt) | quotaUpt != min(quotaUpt) ~ "intermediate"
+  quotaUpt == min(quotaUpt) ~ "least",
+  quotaUpt != max(quotaUpt) | quotaUpt != min(quotaUpt) ~ "intermediate"
 ))
 
 base$choke <- proj$choke_rev[match(paste0(base$fleet, base$stock),
-                                 paste0(proj$fleet, proj$stock))]
+  paste0(proj$fleet, proj$stock))]
 
 
 ## Compute the difference
-base$diff <- base$proj - base$catch  
+base$diff <- base$proj - base$catch
 
-## Plot 
+## Plot
 ## Order the facets by most landings to least landings
 fac_ord <- base %>% group_by(fleet) %>%
   summarise(diff = sum(diff))
@@ -116,7 +124,7 @@ base$Advice_name <- stkFill$Advice_name[match(base$stock, stkFill$stock)]
 base$Advice_name <- factor(base$Advice_name, levels = stkFill$Advice_name)
 
 p1 <- ggplot(base, aes(x = Advice_name, y = diff, fill= Advice_name, colour = choke, group = fleet)) +
-  geom_bar(stat = "identity", aes(colour= choke)) + 
+  geom_bar(stat = "identity", aes(colour= choke)) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   scale_color_manual(values = c('green', 'red'), na.value = NA,
                      limits = c('least','choke'), labels = c("least", "most (*)")) +
