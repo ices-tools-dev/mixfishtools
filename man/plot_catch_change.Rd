@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_catch_change.R
 \name{plot_catch_change}
 \alias{plot_catch_change}
-\title{Plot fleet landings relative to recent landings / quota}
+\title{Plot fleet landings taken up relative to recent landings / quota}
 \usage{
 plot_catch_change(
   data = NULL,
@@ -21,9 +21,13 @@ plot_catch_change(
 \arguments{
 \item{data}{data.frame Contains information on catch by fleet and stock}
 
-\item{basis}{is a character vector with the basis on which to compare the scenario landings, either 'recent_catch' or 'Quota'}
+\item{basis}{is a character vector with the basis on which to compare the
+scenario landings, either 'recent_catch' or 'Quota'. When 'recent_catch' is
+used, the average landings from the defined years (argument `dataYrs`) is used as the
+reference instead of the advice year quota ('Quota')}
 
-\item{dataYrs}{is a vector of years on which to base recent catches, not needed for 'quota' option}
+\item{dataYrs}{is a vector of years on which to base recent catches. Used
+when  `basis = 'recent_catch'`.}
 
 \item{advYr}{is a vector of the year in which the scenario catches are generated.}
 
@@ -66,7 +70,7 @@ data(stfFltStkSum) # summary of fleet/stock-related catch variables
 advYr <- 2022 # advice year
 
 plot_catch_change(data = stfFltStkSum,
- basis = "recent_catch",
+ basis = "Quota",
  dataYrs = 2020:2022,
  advYr = advYr,
  sc = "min",

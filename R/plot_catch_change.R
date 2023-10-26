@@ -1,12 +1,16 @@
-#' Plot fleet landings relative to recent landings / quota
+#' Plot fleet landings taken up relative to recent landings / quota
 #'
 #' @description Plot of a fleets catch difference from the recent catches or the quota.
 #'   By fleet. Most- and least-limiting stocks are also
 #'   denoted. Testing in response to WKMIXFISH2.
 #'
 #' @param data data.frame Contains information on catch by fleet and stock
-#' @param basis is a character vector with the basis on which to compare the scenario landings, either 'recent_catch' or 'Quota'
-#' @param dataYrs is a vector of years on which to base recent catches, not needed for 'quota' option
+#' @param basis is a character vector with the basis on which to compare the
+#'   scenario landings, either 'recent_catch' or 'Quota'. When 'recent_catch' is
+#'   used, the average landings from the defined years (argument `dataYrs`) is used as the
+#'   reference instead of the advice year quota ('Quota')
+#' @param dataYrs is a vector of years on which to base recent catches. Used
+#'   when  `basis = 'recent_catch'`.
 #' @param advYr is a vector of the year in which the scenario catches are generated.
 #' @param sc is a vector with the scenario to plot, e.g. "min"
 #' @param fleets_excl is a vector of fleet names not to plot, e.g. "OTH_OTH"
@@ -38,7 +42,7 @@
 #' advYr <- 2022 # advice year
 #'
 #' plot_catch_change(data = stfFltStkSum,
-#'  basis = "recent_catch",
+#'  basis = "Quota",
 #'  dataYrs = 2020:2022,
 #'  advYr = advYr,
 #'  sc = "min",
@@ -78,8 +82,8 @@ if(basis=="Quota") {
 
 ## The scenario projection
 proj <- filter(data, scenario == sc, year == advYr, !fleet %in% fleets_excl) %>%
-    group_by(fleet, stock, choke) 
-  
+    group_by(fleet, stock, choke)
+
 ## Add the projection and the choke stock
 base$proj <- proj$catch[match(paste0(base$fleet, base$stock),
                                  paste0(proj$fleet, proj$stock))]
@@ -90,7 +94,7 @@ base$proj[is.nan(base$proj) | is.na(base$proj)] <- 0
 
 ## Case of zero-tac advice
 
-proj$quotaUpt <- ifelse(proj$tac==0 & proj$tacshare>0, 1, proj$quotaUpt)
+proj$quotaUpt <- ifelse(proj$quota==0 & proj$tacshare>0, 1, proj$quotaUpt)
 
 proj <- proj %>% group_by(fleet) %>% mutate(choke_rev = case_when(quotaUpt == max(quotaUpt, na.rm = TRUE) ~ "choke",
   quotaUpt == min(quotaUpt, na.rm = TRUE) ~ "least",
