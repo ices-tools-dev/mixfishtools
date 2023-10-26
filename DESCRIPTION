@@ -2,7 +2,7 @@ Package: mixfishtools
 Type: Package
 Title: WGMIXFISH tools
 Version: 0.3.1
-Author: Marc Taylor <marc.taylor@thuenen.de>
+Author: Marc Taylor, Mikel Aristegui, Johnathan Ball, Paul Dolder
 Maintainer: Marc Taylor <marc.taylor@thuenen.de>
 Description: Contains plot templates used in WGMIXFISH-ADVICE and Fisheries 
   Overviews
