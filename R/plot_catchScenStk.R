@@ -77,7 +77,7 @@ plot_catchScenStk <- function(data, adv, ofwhich = FALSE,
     adv$lower <- adv$advice
   }
 
-  p <- ggplot(data = data) + aes(x = scenario, y = catch) +
+  p <- ggplot(data = data) + aes(x = factor(scenario), y = catch) +
     facet_wrap(~ stock, scales = 'free_y') +
     geom_rect(stat = "identity", data = adv,
       mapping = aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = advice, y = 1),
