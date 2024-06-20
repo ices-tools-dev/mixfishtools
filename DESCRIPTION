@@ -1,14 +1,14 @@
 Package: mixfishtools
 Type: Package
 Title: WGMIXFISH tools for reproducibility 
-Version: 0.3.1
-Date: 2023-10-26
+Version: 0.3.2
+Date: 2024-06-20
 Author: Marc Taylor, Mikel Aristegui, Johnathan Ball, Paul Dolder
 Maintainer: Marc Taylor <marc.taylor@thuenen.de>
 Description: Contains plot templates used in WGMIXFISH-ADVICE and Fisheries 
   Overviews
 Depends:
-    R (>= 4.1),
+    R (>= 4.4),
     ggplot2,
     htmlwidgets,
     networkD3,
