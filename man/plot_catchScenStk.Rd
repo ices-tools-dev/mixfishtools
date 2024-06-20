@@ -52,8 +52,8 @@ catchScenStk <- aggregate(catch ~ scenario + stock, data = stfFltStkSum, FUN = s
 
 # re-order scenarios (sq_E, max, min, ... )
 catchScenStk$scenario <- factor(catchScenStk$scenario,
-  levels = c("sq_E", "max", "min", "cod-ns"),
-  labels = c("sq_E", "max", "min", "cod-ns"))
+  levels = c("min", "max", "sq_E", "cod-ns"),
+  labels = c("min", "max", "sq_E", "cod-ns"))
 head(catchScenStk)
 
 catchRange <- rbind(

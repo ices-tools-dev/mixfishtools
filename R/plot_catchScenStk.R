@@ -35,8 +35,8 @@
 #'
 #' # re-order scenarios (sq_E, max, min, ... )
 #' catchScenStk$scenario <- factor(catchScenStk$scenario,
-#'   levels = c("sq_E", "max", "min", "cod-ns"),
-#'   labels = c("sq_E", "max", "min", "cod-ns"))
+#'   levels = c("min", "max", "sq_E", "cod-ns"),
+#'   labels = c("min", "max", "sq_E", "cod-ns"))
 #' head(catchScenStk)
 #'
 #' catchRange <- rbind(
@@ -67,8 +67,6 @@
 plot_catchScenStk <- function(data, adv, ofwhich = FALSE,
   xlab = "Scenario", ylab = "Catch [t]"){
 
-  adv$scenario <- 1 # dummy variable to allow plotting on facets
-
   # add dummy advice range values if missing
   if(!"upper" %in% names(adv)){
     adv$upper <- adv$advice
@@ -79,14 +77,14 @@ plot_catchScenStk <- function(data, adv, ofwhich = FALSE,
 
   p <- ggplot(data = data) + aes(x = scenario, y = catch) +
     facet_wrap(~ stock, scales = 'free_y') +
-    geom_rect(stat = "identity", data = adv,
-      mapping = aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = advice, y = 1),
+    geom_rect(stat = "identity", data = adv, inherit.aes = F,
+      mapping = aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = advice),
       fill = 'green', alpha = 0.25) +
-    geom_rect(stat = "identity", data = adv,
-      mapping = aes(xmin = -Inf, xmax = Inf, ymin = advice, ymax = upper, y = 1),
+    geom_rect(stat = "identity", data = adv, inherit.aes = F,
+      mapping = aes(xmin = -Inf, xmax = Inf, ymin = advice, ymax = upper),
       fill = 'yellow', alpha = 0.25) +
-    geom_rect(stat = "identity", data = adv,
-      mapping = aes(xmin = -Inf, xmax = Inf, ymin = upper, ymax = Inf, y = 1),
+    geom_rect(stat = "identity", data = adv, inherit.aes = F,
+      mapping = aes(xmin = -Inf, xmax = Inf, ymin = upper, ymax = Inf),
       fill = 'red', alpha = 0.25) +
     {if(ofwhich==T) {
       geom_rect_pattern(stat = "identity", data = adv,

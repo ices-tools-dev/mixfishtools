@@ -141,7 +141,7 @@ p1 <- ggplot(base, aes(x = Advice_name, y = diff, fill= Advice_name, colour = ch
   guides(colour = guide_legend(order = 2),
          fill = guide_legend(order = 1)) +
   labs(fill = fillLegendTitle, color = colLegendTitle)  +
-  facet_wrap(~factor(fleet, levels = c(flt_ord)), scale = "free_y", ncol = 4)
+  facet_wrap(~factor(fleet, levels = c(flt_ord)), scales = "free_y", ncol = 4)
 
 
 print(p1)

@@ -1,0 +1,43 @@
+---
+title: "WGMIXFISH guide to output"
+header-includes:
+- \usepackage{pdflscape}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
+- \usepackage[singlelinecheck=false]{caption}
+output:
+  # rmarkdown::html_vignette:
+  rmarkdown::pdf_document:
+    fig_caption: yes
+    number_sections: true
+    df_print: kable
+    toc: true
+    toc_depth: 3
+    keep_tex: yes
+vignette: >
+  %\VignetteIndexEntry{WGMIXFISH best practices}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: refs.bib
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  cache = FALSE, # TRUE for speed. Remember to empty cache after changes to cached R code sections
+  cache.path = "cache/", fig.path = "tex/",
+  echo = TRUE, 
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6, fig.height = 5, dpi=300, 
+  out.width="600px", out.height="500px"
+)
+
+library(kableExtra)
+library(dplyr)
+```
+
+# Introduction
+
+This is just a placeholder for now. Eventually the document will describe the use of the package as well as expected TAF outputs for use in the fisheriesXplorer Shiny App.
+
+
