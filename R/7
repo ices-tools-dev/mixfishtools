@@ -87,8 +87,21 @@ base$proj <- proj$catch[match(paste0(base$fleet, base$stock),
 
 base$proj[is.nan(base$proj) | is.na(base$proj)] <- 0
 
-base$choke <- proj$choke[match(paste0(base$fleet, base$stock),
-			       paste0(proj$fleet, proj$stock))]
+## Add the choke, least and intermediate
+
+## Case of zero-tac advice
+
+proj$quotaUpt <- ifelse(proj$quota==0 & proj$tacshare>0, 1, proj$quotaUpt)
+
+proj <- proj %>% group_by(fleet) %>% mutate(choke_rev = case_when(quotaUpt == max(quotaUpt, na.rm = TRUE) ~ "choke",
+  quotaUpt == min(quotaUpt, na.rm = TRUE) ~ "least",
+  quotaUpt != max(quotaUpt, na.rm = TRUE) | quotaUpt != min(quotaUpt, na.rm = TRUE) ~ "intermediate"
+))
+
+base$choke <- proj$choke_rev[match(paste0(base$fleet, base$stock),
+  paste0(proj$fleet, proj$stock))]
+
+
 ## Compute the difference
 base$diff <- base$proj - base$catch
 
@@ -125,7 +138,7 @@ p1 <- ggplot(base, aes(x = Advice_name, y = diff, fill= Advice_name, colour = ch
   guides(colour = guide_legend(order = 2),
          fill = guide_legend(order = 1)) +
   labs(fill = fillLegendTitle, color = colLegendTitle)  +
-  facet_wrap(~factor(fleet, levels = c(flt_ord)), scales = "free_y", ncol = 4)
+  facet_wrap(~factor(fleet, levels = c(flt_ord)), scale = "free_y", ncol = 4)
 
 
 print(p1)

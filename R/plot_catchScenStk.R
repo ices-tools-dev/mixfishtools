@@ -16,6 +16,8 @@
 #'
 #' @return plot output of class ggplot
 #' @import ggplot2
+#' @importFrom ggpattern geom_rect_pattern geom_col_pattern
+#'
 #' @export
 #'
 #' @examples
@@ -75,7 +77,7 @@ plot_catchScenStk <- function(data, adv, ofwhich = FALSE,
     adv$lower <- adv$advice
   }
 
-  p <- ggplot(data = data) + aes(x = scenario, y = catch) +
+  p <- ggplot(data = data) + aes(x = factor(scenario), y = catch) +
     facet_wrap(~ stock, scales = 'free_y') +
     geom_rect(stat = "identity", data = adv, inherit.aes = F,
       mapping = aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = advice),
@@ -100,7 +102,7 @@ plot_catchScenStk <- function(data, adv, ofwhich = FALSE,
       geom_hline(data = adv, mapping = aes(yintercept = advice_ofwhich), lty = 3, colour = "#85AD00") }} +
     geom_col(width = 0.5, fill = "grey35", color = "grey35") +
     {if(ofwhich==T){
-      geom_col_pattern(aes(x = scenario, y = catch_ofwhich), pattern = "crosshatch",
+      geom_col_pattern(aes(x = factor(scenario), y = catch_ofwhich), pattern = "crosshatch",
         width = 0.5, pattern_colour= NA, pattern_fill = "#85AD00") }} +
     scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
     xlab(label = xlab) +
