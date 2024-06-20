@@ -16,7 +16,6 @@
 #'
 #' @return plot output of class ggplot
 #' @import ggplot2
-#' @importFrom ggpattern geom_rect_pattern geom_col_pattern
 #'
 #' @export
 #'
