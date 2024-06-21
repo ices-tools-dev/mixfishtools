@@ -6,14 +6,14 @@ header-includes:
 - \newcommand{\elandscape}{\end{landscape}}
 - \usepackage[singlelinecheck=false]{caption}
 output:
-  # rmarkdown::html_vignette:
-  rmarkdown::pdf_document:
-    fig_caption: yes
-    number_sections: true
-    df_print: kable
-    toc: true
-    toc_depth: 3
-    keep_tex: yes
+  rmarkdown::html_vignette:
+  # rmarkdown::pdf_document:
+  #   fig_caption: yes
+  #   number_sections: true
+  #   df_print: kable
+  #   toc: true
+  #   toc_depth: 3
+  #   keep_tex: yes
 vignette: >
   %\VignetteIndexEntry{WGMIXFISH best practices}
   %\VignetteEngine{knitr::rmarkdown}
@@ -38,6 +38,61 @@ library(dplyr)
 
 # Introduction
 
-This is just a placeholder for now. Eventually the document will describe the use of the package as well as expected TAF outputs for use in the fisheriesXplorer Shiny App.
+This is just a placeholder for now. Eventually the document will describe the use of the package as well as expected TAF outputs for use in the *fisheriesXplorer* Shiny App.
+
+# Installation of *mixfishtools*
+
+In order to install the most recent version of *mixfishtools*, please install the package in one of the following ways:
+
+```{r install, eval=FALSE, include=TRUE}
+# install pre-compiled package (preferred)
+install.packages('mixfishtools', repo = 'https://ices-tools-prod.r-universe.dev')
+
+# install from source
+library(remotes)
+install_github(repo = "ices-tools-dev/mixfishtools")
+```
+
+Then load the package:
+
+```{r load, message=FALSE, warning=FALSE}
+library(mixfishtools)
+```
+
+# Mixed fisheries considerations
+
+The following section outlines the main plotting functions used for the mixed fisheries considerations document.
+
+A key precursor to adapting many of the following examples to a particular mixed fishery model output is to export a `data.frame` containing outputs by fleet, stock, and scenario. The example data object `stfFltStkSum` is provided in the package, which is subsequently adapted in the following examples.
+
+## Headline plot of catch uptake by stock and scenario
+
+In the following example, we will prepare two objects to be passed to the plotting function `plot_catchScenStk`. 
+
+The first object, `data`, is a `data.frame` containing catches by scenario for the advice year. The example data `stfFltStkSum` is aggregated across fleets to produce this object, with variables named `scenario`, `stock`, and `catch`. The order of scenarios should be specified by the order of levels in the factor variable `scenario`. 
+
+
+```{r }
+# make example data
+data(stfFltStkSum)
+
+# subset data to advice year and restrictive stocks
+advYr <- 2022 # advice year
+restr.stks <- c("COD-NS", "HAD", "PLE-EC", "PLE-NS", "POK", "SOL-EC",
+  "SOL-NS", "TUR", "WHG-NS", "WIT")
+stfFltStkSum <- subset(stfFltStkSum, year == advYr & stock %in% restr.stks)
+
+# data for plotting (catch by scenario and stock)
+catchScenStk <- aggregate(catch ~ scenario + stock, data = stfFltStkSum, FUN = sum)
+
+# re-order scenarios (sq_E, max, min, ... )
+catchScenStk$scenario <- factor(catchScenStk$scenario,
+  levels = c("min", "max", "sq_E", "cod-ns"),
+  labels = c("min", "max", "sq_E", "cod-ns"))
+head(catchScenStk)
+
+```
+The second object, `adv`, is a 
+
 
 
