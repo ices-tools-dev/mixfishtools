@@ -15,11 +15,9 @@ library(remotes)
 install_github(repo = "ices-tools-dev/mixfishtools")
 ```
 
-**WGMIXFISH Best Practices document**
+**mixfishtools vignette [to come]**
 
-This document provides a methodological framework showing decision-making processes and "best practice" recommendations for the implementation of models for mixed fisheries advice. Guidance is meant to feature general approaches that apply across case studies, while further ecoregion-specific details are found in their respective Stock Annexes.
-
-WGMIXFISH members are invited to contribute to the "living" document by editting and submitting changes via pull request to either of the following document formats:
+A tutorial will come :
 
 -   Word [<https://github.com/ices-tools-dev/mixfishtools/blob/main/doc/WGMIXFISH_best_practices.docx>]
 
