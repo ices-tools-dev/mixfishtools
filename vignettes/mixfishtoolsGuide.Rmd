@@ -7,13 +7,17 @@ header-includes:
 - \usepackage[singlelinecheck=false]{caption}
 output:
   # rmarkdown::html_vignette:
-  rmarkdown::pdf_document:
-    fig_caption: yes
-    number_sections: true
-    df_print: kable
-    toc: true
-    toc_depth: 3
-    keep_tex: yes
+
+  html_document:
+    df_print: paged
+
+  # rmarkdown::pdf_document:
+  #   fig_caption: yes
+  #   number_sections: true
+  #   df_print: kable
+  #   toc: true
+  #   toc_depth: 3
+  #   keep_tex: yes
 vignette: >
   %\VignetteIndexEntry{WGMIXFISH best practices}
   %\VignetteEngine{knitr::rmarkdown}
@@ -34,10 +38,163 @@ knitr::opts_chunk$set(
 
 library(kableExtra)
 library(dplyr)
+library(png)
 ```
 
 # Introduction
 
-This is just a placeholder for now. Eventually the document will describe the use of the package as well as expected TAF outputs for use in the fisheriesXplorer Shiny App.
+This is just a placeholder for now. Eventually the document will describe the use of the package as well as expected TAF outputs for use in the *fisheriesXplorer* Shiny App.
+
+# Installation of *mixfishtools*
+
+In order to install the most recent version of *mixfishtools*, please install the package in one of the following ways:
+
+```{r install, eval=FALSE, include=TRUE}
+# install pre-compiled package (preferred)
+install.packages('mixfishtools', repo = 'https://ices-tools-prod.r-universe.dev')
+
+# install from source
+library(remotes)
+install_github(repo = "ices-tools-dev/mixfishtools")
+```
+
+Then load the package:
+
+```{r load, message=FALSE, warning=FALSE}
+library(mixfishtools)
+```
+
+# Mixed fisheries considerations
+
+The following section outlines the main plotting functions used for the mixed fisheries considerations document.
+
+A key precursor to adapting many of the following examples to a particular mixed fishery model output is to export a `data.frame` containing outputs by fleet, stock, and scenario, which is derived from `FLBEIA::fltStkSum()`. The example data object `stfFltStkSum` is provided in the package, which is subsequently adapted in the following examples.
+
+## Headline plot of catch uptake by stock and scenario
+
+In the following example, we will prepare two objects to be passed to the plotting function `plot_catchScenStk`. 
+
+The first object, `data`, is a `data.frame` containing catches by scenario for the advice year. The example data `stfFltStkSum` is aggregated across fleets to produce this object, with variables named `scenario`, `stock`, and `catch`. The order of scenarios should be specified by the order of levels in the factor variable `scenario`. 
 
 
+```{r include=FALSE}
+# make example data
+data(stfFltStkSum)
+data("refTable")
+
+# subset data to advice year and restrictive stocks
+advYr <- 2022 # advice year
+restr.stks <- c("COD-NS", "HAD", "PLE-EC", "PLE-NS", "POK", "SOL-EC",
+  "SOL-NS", "TUR", "WHG-NS", "WIT")
+stfFltStkSum <- subset(stfFltStkSum, year == advYr & stock %in% restr.stks)
+
+# data for plotting (catch by scenario and stock)
+data <- aggregate(catch ~ scenario + stock, data = stfFltStkSum, FUN = sum)
+
+# add Advice_name
+data <- merge(x = data, y = refTable[,c("stock", "Advice_name")], all.x = TRUE)
+
+
+# re-order scenarios (sq_E, max, min, ... )
+data$scenario <- factor(data$scenario,
+  levels = c("min", "max", "sq_E", "cod-ns"),
+  labels = c("min", "max", "sq_E", "cod-ns"))
+
+data
+```
+
+
+
+
+
+The second object, `adv`, is a `data.frame` containing advice by stock. The expected variable names are `advice` by `stock`. Optionally, the advice levels associated with Fmsy upper (`upper`) and Fmsy lower (`lower`) can be included. Where Fmsy upper or Fmsy lower advice levels are not applicable, one should duplicate the advice levels (e.g. no Fmsy upper advice is given for COD-NS given it's poor status, SSB < Btrigger, in the advice year).
+
+```{r plot_fltStkSum_adv}
+# make data.frame of advice reference values 
+adv <- rbind(
+  data.frame(stock = "COD-NS", advice = 14276, lower = 9701, upper = 14276),
+  data.frame(stock = "HAD", advice = 128708, lower = 111702, upper = 128708),
+  data.frame(stock = "PLE-EC", advice = 6365, lower = 4594, upper = 6365),
+  data.frame(stock = "PLE-NS", advice = 142507, lower = 101854, upper = 195622),
+  data.frame(stock = "POK", advice = 49614, lower = 30204, upper = 49614),
+  data.frame(stock = "SOL-EC", advice = 1810, lower = 1068, upper = 2069),
+  data.frame(stock = "SOL-NS", advice = 15330, lower = 9523, upper = 21805),
+  data.frame(stock = "TUR", advice = 3609, lower = 2634, upper = 4564),
+  data.frame(stock = "WHG-NS", advice = 88426, lower = 70169, upper = 91703),
+  data.frame(stock = "WIT", advice = 1206, lower = 875, upper = 1206)
+)
+
+adv
+```
+
+
+The two objects are then passed to `plot_catchScenStk` for the final plot.
+
+```{r plot_catchScenStk_output}
+p <- plot_catchScenStk(data = data, adv = adv)
+# print(p)
+
+fname <- paste0(tempfile(), ".png")
+png(fname, width = 6, height = 5, units = "in", res = 400)
+print(p)
+out <- dev.off()
+
+tmp <- readPNG(fname)
+knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
+
+
+```
+
+
+
+See `?plot_catchScenStk` for further argument details.
+
+
+
+## Fleet effort restriction plot
+
+
+```{r include=FALSE}
+# make example data
+data(refTable) # reference table with stock advice names, colors, order, etc.
+data(stfFltSum) # summary of fleet-related variables (e.g. effort)
+data(stfFltStkSum) # summary of fleet/stock-related catch variables
+advYr <- 2022 # advice year
+df <- subset(stfFltStkSum, scenario == "min" & year == advYr)
+eff <- subset(
+  stfFltSum, scenario == "min" & year == advYr)[,c("fleet", "effort")]
+sqEff <- subset(
+  stfFltSum, scenario == "sq_E" & year == advYr)[,c("fleet", "effort")]
+names(sqEff)[2] <- "sqEffort"
+eff <- merge(x = eff, y = sqEff, all.x = TRUE)
+df <- merge(x = df, y = eff, all.x = TRUE)
+df$quotaEffort <- df$effort / df$quotaUpt
+
+restr.stks <- c("COD-NS", "HAD", "PLE-EC", "PLE-NS", "POK", "SOL-EC",
+  "SOL-NS", "TUR", "WHG-NS", "WIT", "NEP6", "NEP7", "NEP8", "NEP9")
+fls <- unique(df$fleet)
+df2 <- vector("list", length(fls))
+names(df2) <- fls
+for(i in seq(fls)){
+  tmp <- subset(df, fleet == fls[i])
+  tmp$Limitation <- NA # initial NA setting for all stocks
+  mostLimStk <- subset(tmp, stock %in% restr.stks)
+  mostLimStk <- mostLimStk$stock[which.max(mostLimStk$quotaUpt)]
+  tmp$Limitation[which(tmp$stock == mostLimStk)] <- "most"
+  leastLimStk <- subset(stfFltStkSum, scenario == "max" & year == advYr &
+    fleet == fls[i] & stock %in% restr.stks)
+  leastLimStk <- leastLimStk$stock[which.min(leastLimStk$quotaUpt)]
+  tmp$Limitation[which(tmp$stock == leastLimStk)] <- "least"
+  df2[[i]] <- tmp
+}
+df2 <- do.call("rbind", df2)
+
+# add Advice_name corresponding to refTable
+df2 <- merge(x = df2, y = refTable[,c("stock", "Advice_name")], all.x = TRUE)
+data <- df2
+data <- data[,c("stock", "Advice_name", "scenario", "catch")]
+```
+
+```{r}
+data
+```
