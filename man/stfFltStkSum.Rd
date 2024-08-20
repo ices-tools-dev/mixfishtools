@@ -25,13 +25,16 @@ The \code{stfFltStkSum} data.frame is an output of
   \item year - advice year
   \item fleet - fleet names
   \item stock - stock names used in mixed fishery model
-  \item Advice_name - stock code labels
-  \item Limitation - by fleet, identifies limiting stocks
-    (levels: choke, interm., least). Describes the most-, intermediate-,
-    and least-limiting quotas based on quota uptake ratios (quotaUpt).
-  \item quotaEffort - effort required to take up quota in advice year
-  \item sqE_effort - status quo effort from last data year
-  \item rel_effort - ratio of quota_effort / sqE_effort
+  \item iter - iteration number
+  \item catch -
+  \item landings -
+  \item discards -
+  \item discRat -
+  \item price -
+  \item tacshare - fraction of the total stock quota for a given fleet
+  \item quota - advised catch quota
+  \item quotaUptake - effort required to take up quota
+  \item choke - (logical) is stock the limiting one for the fleet
 }
 }
 \examples{

@@ -48,12 +48,15 @@ Users will need to provide the data and reference table objects to
   rule).
 }
 \examples{
-# make example data
-
+# make data
+data(refTable) # reference table with stock advice names, colors, order, etc.
 data(stfFltSum) # summary of fleet-related variables (e.g. effort)
 data(stfFltStkSum) # summary of fleet/stock-related catch variables
+
+## get data from advice year
 advYr <- 2022 # advice year
 df <- subset(stfFltStkSum, scenario == "min" & year == advYr)
+
 eff <- subset(
   stfFltSum, scenario == "min" & year == advYr)[,c("fleet", "effort")]
 sqEff <- subset(
@@ -63,10 +66,19 @@ eff <- merge(x = eff, y = sqEff, all.x = TRUE)
 df <- merge(x = df, y = eff, all.x = TRUE)
 df$quotaEffort <- df$effort / df$quotaUpt
 df$relEffort <- df$quotaEffort / df$sqEffort
-df$scenario <- df$stock
+
+# df$scenario <- df$stock
+
 restr.stks <- c("COD-NS", "HAD", "PLE-EC", "PLE-NS", "POK", "SOL-EC",
   "SOL-NS", "TUR", "WHG-NS", "WIT", "NEP6", "NEP7", "NEP8", "NEP9")
 df <- subset(df, stock \%in\% restr.stks)
+
+# replace short stock names with ICES stock codes
+df$stock <- refTable$stock[match(df$stock, refTable$stock_short)]
+
+# adjust stock order for the plot
+df$stock <- factor(df$stock, levels = refTable$stock)
+
 
 # convert to percentage change
 df$var <- 100*(df$relEffort-1)

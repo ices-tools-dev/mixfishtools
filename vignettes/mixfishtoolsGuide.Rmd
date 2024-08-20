@@ -91,9 +91,8 @@ stfFltStkSum <- subset(stfFltStkSum, year == advYr & stock %in% restr.stks)
 # data for plotting (catch by scenario and stock)
 data <- aggregate(catch ~ scenario + stock, data = stfFltStkSum, FUN = sum)
 
-# add Advice_name
-data <- merge(x = data, y = refTable[,c("stock", "Advice_name")], all.x = TRUE)
-
+# replace short stock name with ICES stock code
+data$stock <- refTable$stock[match(data$stock, refTable$stock_short)]
 
 # re-order scenarios (sq_E, max, min, ... )
 data$scenario <- factor(data$scenario,
@@ -124,6 +123,10 @@ adv <- rbind(
   data.frame(stock = "WIT", advice = 1206, lower = 875, upper = 1206)
 )
 
+# replace short stock name with ICES stock code
+adv$stock <- refTable$stock[match(adv$stock, refTable$stock_short)]
+
+
 adv
 ```
 
@@ -141,8 +144,6 @@ out <- dev.off()
 
 tmp <- readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
-
-
 ```
 
 
@@ -159,40 +160,54 @@ See `?plot_catchScenStk` for further argument details.
 data(refTable) # reference table with stock advice names, colors, order, etc.
 data(stfFltSum) # summary of fleet-related variables (e.g. effort)
 data(stfFltStkSum) # summary of fleet/stock-related catch variables
+
+## get data from advice year
+
+# catches by fleet and stock
 advYr <- 2022 # advice year
 df <- subset(stfFltStkSum, scenario == "min" & year == advYr)
+
+## effort by fleet and scenario
 eff <- subset(
-  stfFltSum, scenario == "min" & year == advYr)[,c("fleet", "effort")]
+ stfFltSum, scenario == "min" & year == advYr)[,c("fleet", "effort")]
 sqEff <- subset(
-  stfFltSum, scenario == "sq_E" & year == advYr)[,c("fleet", "effort")]
+ stfFltSum, scenario == "sq_E" & year == advYr)[,c("fleet", "effort")]
 names(sqEff)[2] <- "sqEffort"
 eff <- merge(x = eff, y = sqEff, all.x = TRUE)
 df <- merge(x = df, y = eff, all.x = TRUE)
 df$quotaEffort <- df$effort / df$quotaUpt
 
+## Determine most- and least-limiting stock by fleet
+# restrictive stocks
 restr.stks <- c("COD-NS", "HAD", "PLE-EC", "PLE-NS", "POK", "SOL-EC",
-  "SOL-NS", "TUR", "WHG-NS", "WIT", "NEP6", "NEP7", "NEP8", "NEP9")
+ "SOL-NS", "TUR", "WHG-NS", "WIT", "NEP6", "NEP7", "NEP8", "NEP9")
 fls <- unique(df$fleet)
 df2 <- vector("list", length(fls))
 names(df2) <- fls
 for(i in seq(fls)){
-  tmp <- subset(df, fleet == fls[i])
-  tmp$Limitation <- NA # initial NA setting for all stocks
-  mostLimStk <- subset(tmp, stock %in% restr.stks)
-  mostLimStk <- mostLimStk$stock[which.max(mostLimStk$quotaUpt)]
-  tmp$Limitation[which(tmp$stock == mostLimStk)] <- "most"
-  leastLimStk <- subset(stfFltStkSum, scenario == "max" & year == advYr &
-    fleet == fls[i] & stock %in% restr.stks)
-  leastLimStk <- leastLimStk$stock[which.min(leastLimStk$quotaUpt)]
-  tmp$Limitation[which(tmp$stock == leastLimStk)] <- "least"
-  df2[[i]] <- tmp
+ tmp <- subset(df, fleet == fls[i])
+ tmp$Limitation <- NA # initial NA setting for all stocks
+
+ # most-limiting (highest quota uptake in min scenario)
+ mostLimStk <- subset(tmp, stock %in% restr.stks)
+ mostLimStk <- mostLimStk$stock[which.max(mostLimStk$quotaUpt)]
+ tmp$Limitation[which(tmp$stock == mostLimStk)] <- "most"
+
+ # least-limiting (lowest quota uptake in max scenario)
+ leastLimStk <- subset(stfFltStkSum, scenario == "max" & year == advYr &
+   fleet == fls[i] & stock %in% restr.stks)
+ leastLimStk <- leastLimStk$stock[which.min(leastLimStk$quotaUpt)]
+ tmp$Limitation[which(tmp$stock == leastLimStk)] <- "least"
+
+ # return result
+ df2[[i]] <- tmp
 }
 df2 <- do.call("rbind", df2)
 
-# add Advice_name corresponding to refTable
-df2 <- merge(x = df2, y = refTable[,c("stock", "Advice_name")], all.x = TRUE)
-data <- df2
-data <- data[,c("stock", "Advice_name", "scenario", "catch")]
+# replace short stock names with ICES stock codes
+df2$stock <- refTable$stock[match(df2$stock, refTable$stock_short)]
+
+data <- df2[,c("fleet", "stock", "catch", "Limitation", "quotaEffort", "sqEffort")]
 ```
 
 ```{r}

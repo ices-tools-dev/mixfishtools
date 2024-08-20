@@ -41,7 +41,12 @@
 #' data(stfFltStkSum) # summary of fleet/stock-related catch variables
 #' advYr <- 2022 # advice year
 #'
-#' plot_catch_change(data = stfFltStkSum,
+#' # replace short stock names with ICES stock codes
+#' stfFltStkSum$stock <- refTable$stock[match(stfFltStkSum$stock,
+#'   refTable$stock_short)]
+#'
+#'
+#' p <- plot_catch_change(data = stfFltStkSum,
 #'  basis = "Quota",
 #'  dataYrs = 2020:2022,
 #'  advYr = advYr,
@@ -52,6 +57,12 @@
 #'  ylab = "landings change (tonnes)",
 #'  fillLegendTitle = "Stock",
 #'  colLegendTitle = "Limiting stock")
+#'
+#' print(p)
+#'
+#' # export plot
+#' # png("plot_change.png", width = 8, height = 10, units = "in", res = 400)
+#' # print(p); dev.off()
 #'
 plot_catch_change <- function(data = NULL,
   basis = "recent_catch",
@@ -79,11 +90,11 @@ if(basis=="Quota") {
 
 ## The scenario projection
 proj <- filter(data, scenario == sc, year == advYr, !fleet %in% fleets_excl) %>%
-    group_by(fleet, stock, choke)
+  group_by(fleet, stock, choke)
 
 ## Add the projection and the choke stock
 base$proj <- proj$catch[match(paste0(base$fleet, base$stock),
-                                 paste0(proj$fleet, proj$stock))]
+  paste0(proj$fleet, proj$stock))]
 
 base$proj[is.nan(base$proj) | is.na(base$proj)] <- 0
 
@@ -103,19 +114,19 @@ stkFill <- data.frame(stock = unique(data$stock))
 stkFill <- merge(x = stkFill, y = refTable, all.x = TRUE)
 stkFill <- stkFill[order(stkFill$order),]
 stkColors <- stkFill$col
-names(stkColors) <- stkFill$Advice_name
+names(stkColors) <- stkFill$stock
 
-base$Advice_name <- stkFill$Advice_name[match(base$stock, stkFill$stock)]
-base$Advice_name <- factor(base$Advice_name, levels = stkFill$Advice_name)
+base$stock <- factor(base$stock, levels = stkFill$stock)
 
-p1 <- ggplot(base, aes(x = Advice_name, y = diff, fill= Advice_name, colour = choke, group = fleet)) +
+p1 <- ggplot(base, aes(x = stock, y = diff, fill = stock, colour = choke, group = fleet)) +
+  facet_wrap(~factor(fleet, levels = c(flt_ord)), scales = "free_y", ncol = 4) +
   geom_bar(stat = "identity", aes(colour= choke)) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   scale_color_manual(values = c('green', 'red'), na.value = NA,
-                     limits = c('least','choke'), labels = c("least", "most (*)")) +
+    limits = c('least','choke'), labels = c("least", "most (*)")) +
   xlab(xlab) + ylab(ylab) +
   geom_text(data = filter(base, choke == "choke"), aes(label = "*"),
-            nudge_y = filter(base,choke=="choke")$diff * .2, show.legend = FALSE) +
+    nudge_y = filter(base,choke=="choke")$diff * .2, show.legend = FALSE) +
   theme_bw() +
   theme(
     axis.text.x = element_text(angle = -90, hjust = 0, vjust = 0.3, size = 7),
@@ -124,9 +135,7 @@ p1 <- ggplot(base, aes(x = Advice_name, y = diff, fill= Advice_name, colour = ch
     strip.text = element_text(size = 9)) +
   guides(colour = guide_legend(order = 2),
          fill = guide_legend(order = 1)) +
-  labs(fill = fillLegendTitle, color = colLegendTitle)  +
-  facet_wrap(~factor(fleet, levels = c(flt_ord)), scales = "free_y", ncol = 4)
-
+  labs(fill = fillLegendTitle, color = colLegendTitle)
 
 print(p1)
 

@@ -6,6 +6,7 @@
 ^working$
 ^working/effortPlot$
 ^working/hexSticker_figs$
+^data-raw
 ^.png$
 
 ^vignettes/cache$
