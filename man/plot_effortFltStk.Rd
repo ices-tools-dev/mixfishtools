@@ -51,7 +51,7 @@ Plot of effort required to uptake each stock's quota
 Users will need to provide the data and reference table objects to
   produce the plot.
   In the best case, effort associated with complete quota uptake by
-  fleet (`data$effortQuota`) may be derived from scenarios restricting fleet
+  fleet (`data$quotaEffort`) may be derived from scenarios restricting fleet
   catch one stock at a time. In the following example, however, effort
   levels are derived by linearly extrapolating the quota uptake levels
   by the effort of the "min" scenario. This is strictly linear when quotas

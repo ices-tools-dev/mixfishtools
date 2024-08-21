@@ -102,11 +102,13 @@
 #'
 #' # plot
 #' p <- plot_overUnderFltStk(data = df2, refTable = refTable)
+#' p
 #' # png("overUnderFltStk1.png", width = 8, height = 10, units = "in", res = 400)
 #' # print(p); dev.off()
 #'
 #' # adjust ggplot2 settings
 #' p <- p + theme(text = element_text(size = 12))
+#' p
 #' # png("overUnderFltStk2.png", width = 8, height = 10, units = "in", res = 400)
 #' # print(p); dev.off()
 #'

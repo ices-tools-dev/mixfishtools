@@ -70,6 +70,7 @@
 #' p2 <- p + theme(text = element_text(size = 8),
 #'   axis.text.x = element_text(angle = 90, vjust = 0, hjust=1)) +
 #'   facet_wrap(divider,  scales = "fixed") # remove free axes
+#' print(p2)
 #'
 #' # export plot
 #' # png("catchComp1.png", width = 7, height = 7, units = "in", res = 400)
@@ -131,7 +132,7 @@ plot_catchComp <- function(data, refTable, filters=NULL,
   tmp <- tmp[order(tmp$order),]
   stkColors <- tmp$col
   names(stkColors) <- tmp$stock
-  stkColorScale <- scale_colour_manual(name = "Stock", values = stkColors,
+  stkColorScale <- scale_colour_manual(name = "stock", values = stkColors,
     aesthetics = c("colour", "fill"))
 
   data$stock <- factor(data$stock, levels = tmp$stock) # orders the stocks

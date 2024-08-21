@@ -45,6 +45,8 @@ library(png)
 
 This is just a placeholder for now. Eventually the document will describe the use of the package as well as expected TAF outputs for use in the *fisheriesXplorer* Shiny App.
 
+All example data is created from several included data files (e.g. `stfFltSum`,`stfFltStkSum`, `stfMtStkSum`), with function-specific preparation shown in the examples of respective plotting functions. For brevity in this tutorial, only the final input objects are shown.
+
 # Installation of *mixfishtools*
 
 In order to install the most recent version of *mixfishtools*, please install the package in one of the following ways:
@@ -77,7 +79,7 @@ In the following example, we will prepare two objects to be passed to the plotti
 The first object, `data`, is a `data.frame` containing catches by scenario for the advice year. The example data `stfFltStkSum` is aggregated across fleets to produce this object, with variables named `scenario`, `stock`, and `catch`. The order of scenarios should be specified by the order of levels in the factor variable `scenario`. 
 
 
-```{r include=FALSE}
+```{r plot_catchScenStk_data_prep, include=FALSE}
 # make example data
 data(stfFltStkSum)
 data("refTable")
@@ -98,17 +100,18 @@ data$stock <- refTable$stock[match(data$stock, refTable$stock_short)]
 data$scenario <- factor(data$scenario,
   levels = c("min", "max", "sq_E", "cod-ns"),
   labels = c("min", "max", "sq_E", "cod-ns"))
+```
 
+```{r plot_catchScenStk_data}
 data
 ```
 
 
 
 
-
 The second object, `adv`, is a `data.frame` containing advice by stock. The expected variable names are `advice` by `stock`. Optionally, the advice levels associated with Fmsy upper (`upper`) and Fmsy lower (`lower`) can be included. Where Fmsy upper or Fmsy lower advice levels are not applicable, one should duplicate the advice levels (e.g. no Fmsy upper advice is given for COD-NS given it's poor status, SSB < Btrigger, in the advice year).
 
-```{r plot_fltStkSum_adv}
+```{r plot_catchScenStk_adv_prep, include=FALSE}
 # make data.frame of advice reference values 
 adv <- rbind(
   data.frame(stock = "COD-NS", advice = 14276, lower = 9701, upper = 14276),
@@ -125,15 +128,17 @@ adv <- rbind(
 
 # replace short stock name with ICES stock code
 adv$stock <- refTable$stock[match(adv$stock, refTable$stock_short)]
+```
 
-
+```{r plot_catchScenStk_adv}
 adv
 ```
 
 
+
 The two objects are then passed to `plot_catchScenStk` for the final plot.
 
-```{r plot_catchScenStk_output}
+```{r plot_catchScenStk_output, out.width="70%", out.height="70%"}
 p <- plot_catchScenStk(data = data, adv = adv)
 # print(p)
 
@@ -154,9 +159,9 @@ See `?plot_catchScenStk` for further argument details.
 
 ## Fleet effort restriction plot
 
+Two main objects are used by the `plot_effortFltStk` function: a `data` object and a `refTable` object containing information on plotting colors for added consistency across sevel subsequent plots. 
 
-```{r include=FALSE}
-# make example data
+```{r plot_effortFltStk_data, include=FALSE}
 data(refTable) # reference table with stock advice names, colors, order, etc.
 data(stfFltSum) # summary of fleet-related variables (e.g. effort)
 data(stfFltStkSum) # summary of fleet/stock-related catch variables
@@ -213,3 +218,141 @@ data <- df2[,c("fleet", "stock", "catch", "Limitation", "quotaEffort", "sqEffort
 ```{r}
 data
 ```
+
+
+```{r refTab}
+data("refTable")
+refTable
+```
+
+
+
+
+The two objects are then passed to `plot_effortFltStk` for the final plot.
+
+```{r plot_effortFltStk_output, out.width="70%", out.height="70%"}
+p <- plot_effortFltStk(data = data, refTable = refTable)
+
+fname <- paste0(tempfile(), ".png")
+png(fname, width = 8, height = 10, units = "in", res = 400)
+print(p)
+out <- dev.off()
+
+tmp <- readPNG(fname)
+knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
+```
+
+
+
+## Landing by stock plot
+
+
+```{r plot_landByStock_data_prep, include = FALSE}
+# make example data
+data(stfFltStkSum)
+head(stfFltStkSum)
+
+data(refTable)
+head(refTable)
+
+# select final data year and a single scenario, and aggregated total landings
+datYr <- 2020
+dat <- subset(stfFltStkSum, year == datYr & scenario == "min")
+agg <- aggregate(landings ~ stock, dat, sum, na.rm = TRUE)
+
+# In the North Sea model, all Nephrops FUs area aggregated together
+agg$isNEP <- seq(nrow(agg)) %in% grep("NEP", agg$stock)
+
+agg <- rbind(subset(agg, !isNEP)[,c(1:2)],
+  data.frame(stock = "Nephrops", landings = sum(subset(agg, isNEP)$landings)))
+
+# replace stock with ICES stock code
+agg$stock <- refTable$stock[match(agg$stock, refTable$stock_short)]
+
+names(agg) <- c("stock", "value")
+data <- agg
+```
+
+
+```{r plot_landByStock_data}
+data
+```
+
+```{r plot_landByStock_output, out.width="70%", out.height="70%"}
+p <- plot_landByStock(data = data, refTable)
+
+fname <- paste0(tempfile(), ".png")
+png(fname, width = 6, height = 6, units = "in", res = 400)
+print(p)
+out <- dev.off()
+
+tmp <- readPNG(fname)
+knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
+
+```
+
+
+
+## Landing by metier and stock plot
+
+
+```{r plot_landByMetStock_prep, include = FALSE}
+# make example data
+data(stfMtStkSum)
+head(stfMtStkSum)
+data(refTable)
+head(refTable)
+
+data <- stfMtStkSum
+
+# add metier_cat
+tmp <- strsplit(data$metier, ".", fixed = TRUE)
+data$metier_cat <- unlist(lapply(tmp, FUN = function(x){x[1]}))
+
+# select final data year and a single scenario, and aggregated total landings
+# by stock and metier
+datYr <- 2020
+data <- subset(data, year == datYr & scenario == "min")
+agg <- aggregate(landings ~ metier_cat + stock, data, FUN = sum, na.rm = TRUE)
+
+# In the North Sea model, all Nephrops FUs area aggregated together
+agg$isNEP <- seq(nrow(agg)) %in% grep("NEP", agg$stock)
+agg1 <- subset(agg, !isNEP)[,c(1:3)]
+agg2 <- aggregate(landings ~ metier_cat, data = subset(agg, isNEP),
+  FUN = sum, na.rm = TRUE)
+agg2$stock <- "Nephrops"
+agg <- merge(agg1, agg2, all = TRUE)
+agg <- agg[,c("stock", "metier_cat", "landings")]
+
+names(agg) <- c("stock", "metier","value")
+agg
+
+# subset included metiers
+metIncl <- c("TR1", "TR2", "BT1", "BT2", "GN1", "GT1", "LL1", "beam_oth",
+  "pots", "OTH", "MIS")
+agg <- subset(agg, metier %in% metIncl)
+
+# replace stock with ICES stock code
+agg$stock <- refTable$stock[match(agg$stock, refTable$stock_short)]
+
+data <- agg
+```
+
+
+```{r plot_landByMetStock_data}
+data
+```
+
+```{r plot_landByMetStock_output, out.width="70%", out.height="70%"}
+p <- plot_landByMetStock(data = data, refTable)
+
+fname <- paste0(tempfile(), ".png")
+png(fname, width = 6, height = 6, units = "in", res = 400)
+print(p)
+out <- dev.off()
+
+tmp <- readPNG(fname)
+knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
+
+```
+
