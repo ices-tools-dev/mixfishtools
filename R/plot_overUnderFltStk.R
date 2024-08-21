@@ -20,8 +20,9 @@
 #' @param xlab character X-axis label (Default: xlab = "Stock")
 #' @param ylab character Y-axis label (Default: ylab = "Predicted catch [t]
 #'   with advice undershoot (negative extent)")
-#'  @param yExt Fraction of absolute range to extend y-axis for each fleet
+#' @param yExt Fraction of absolute range to extend y-axis for each fleet
 #'    facet (Default: yExt = 0.3).
+#' @param borderSize line width of border around bars (Default: borderSize=0.5)
 #' @param fillLegendTitle character Fill legend title
 #'   (Default: `fillLegendTitle = "Stock"`)
 #' @param colLegendTitle character Color legend title

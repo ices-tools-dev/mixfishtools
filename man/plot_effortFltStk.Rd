@@ -16,16 +16,16 @@ plot_effortFltStk(
 \arguments{
 \item{data}{data.frame Contains information on effort required to uptake
 quotas by fleet and stock, plus designation of each stock's limitation
-status to the fleet's fishing effort. Stock variable names (`Advice_name`)
+status to the fleet's fishing effort. Stock variable names (`stock`)
 should match those of \code{\link[mixfishtools]{refTable}}.
 Other required variables include: `Limitation` - defines, by fleet, the
 most- (`most`), least- (`least`), and intermediate-limiting (`NA`)
-stocks; `effortQuota` - the effort, by fleet, required to take up the
-quota share of each stock; `sqE_effort` - status quo effort corresponding
+stocks; `quotaEffort` - the effort, by fleet, required to take up the
+quota share of each stock; `sqEffort` - status quo effort corresponding
 to most recent data year before forecast.}
 
 \item{refTable}{data.frame Contains stock look-up information for consistent
-plotting of stocks. `Advice_name` defines the stock names corresponding to
+plotting of stocks. `stock` defines the stock names corresponding to
 `data` object. `col` defines the color used to fill bars in plot.
 `order` defines the order of stocks in the plot facets.}
 

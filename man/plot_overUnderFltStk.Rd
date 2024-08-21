@@ -22,8 +22,8 @@ status to the fleet's fishing effort. Stock variable names (`Advice_name`)
 should match those of \code{\link[mixfishtools]{refTable}}.
 Other required variables include: `Limitation` - defines, by fleet, the
 most- (`most`), least- (`least`), and intermediate-limiting (`NA`)
-stocks; `effortQuota` - the effort, by fleet, required to take up the
-quota share of each stock; `sqE_effort` - status quo effort corresponding
+stocks; `quotaEffort` - the effort, by fleet, required to take up the
+quota share of each stock; `sqEffort` - status quo effort corresponding
 to most recent data year before forecast.}
 
 \item{refTable}{data.frame Contains stock look-up information for consistent
@@ -31,12 +31,15 @@ plotting of stocks. `Advice_name` defines the stock names corresponding to
 `data` object. `col` defines the color used to fill bars in plot.
 `order` defines the order of stocks in the plot facets.}
 
+\item{yExt}{Fraction of absolute range to extend y-axis for each fleet
+facet (Default: yExt = 0.3).}
+
 \item{xlab}{character X-axis label (Default: xlab = "Stock")}
 
 \item{ylab}{character Y-axis label (Default: ylab = "Predicted catch [t]
- with advice undershoot (negative extent)")
-@param yExt Fraction of absolute range to extend y-axis for each fleet
-  facet (Default: yExt = 0.3).}
+with advice undershoot (negative extent)")}
+
+\item{borderSize}{line width of border around bars (Default: borderSize=0.5)}
 
 \item{fillLegendTitle}{character Fill legend title
 (Default: `fillLegendTitle = "Stock"`)}
