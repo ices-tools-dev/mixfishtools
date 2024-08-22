@@ -43,9 +43,16 @@ library(png)
 
 # Introduction
 
-This is just a placeholder for now. Eventually the document will describe the use of the package as well as expected TAF outputs for use in the *fisheriesXplorer* Shiny App.
+This is just a placeholder vignette for now. Eventually the document will describe the use of the package as well as expected TAF outputs for use in the *fisheriesXplorer* Shiny App. Most plotting function produce `ggplot2` outputs, which can be subsequently adapted to specific formatting needs; e.g.:
 
-All example data is created from several included data files (e.g. `stfFltSum`,`stfFltStkSum`, `stfMtStkSum`), with function-specific preparation shown in the examples of respective plotting functions. For brevity in this tutorial, only the final input objects are shown.
+```{r ggplot2_adapt_ex, eval=FALSE, include=TRUE}
+p <- plot_effortFltStk(data, refTable)
+p <- p + theme(text = element_text(size = 12)) # adjust font size
+print(p)
+```
+
+
+All example data is created from data files included in the *mixfishtools* package (e.g. `stfFltSum`, `stfFltStkSum`, `stfMtStkSum`). For brevity, only the final prepared data structures necessary for the respective functions are shown below, but the procedures to adapt the above example data to the final structures are illustrated in the respective help page examples of each function (e.g. `?plot_catchScenStk`).
 
 # Installation of *mixfishtools*
 
@@ -70,13 +77,11 @@ library(mixfishtools)
 
 The following section outlines the main plotting functions used for the mixed fisheries considerations document.
 
-A key precursor to adapting many of the following examples to a particular mixed fishery model output is to export a `data.frame` containing outputs by fleet, stock, and scenario, which is derived from `FLBEIA::fltStkSum()`. The example data object `stfFltStkSum` is provided in the package, which is subsequently adapted in the following examples.
-
 ## Headline plot of catch uptake by stock and scenario
 
 In the following example, we will prepare two objects to be passed to the plotting function `plot_catchScenStk`. 
 
-The first object, `data`, is a `data.frame` containing catches by scenario for the advice year. The example data `stfFltStkSum` is aggregated across fleets to produce this object, with variables named `scenario`, `stock`, and `catch`. The order of scenarios should be specified by the order of levels in the factor variable `scenario`. 
+The first object, `data`, is a `data.frame` containing catches by scenario and stock for the advice year. The example data `stfFltStkSum` is aggregated across fleets to produce this object, with variables named `scenario`, `stock`, and `catch`. The order of scenarios should be specified by the order of levels in the factor variable `scenario`. 
 
 
 ```{r plot_catchScenStk_data_prep, include=FALSE}
@@ -107,9 +112,7 @@ data
 ```
 
 
-
-
-The second object, `adv`, is a `data.frame` containing advice by stock. The expected variable names are `advice` by `stock`. Optionally, the advice levels associated with Fmsy upper (`upper`) and Fmsy lower (`lower`) can be included. Where Fmsy upper or Fmsy lower advice levels are not applicable, one should duplicate the advice levels (e.g. no Fmsy upper advice is given for COD-NS given it's poor status, SSB < Btrigger, in the advice year).
+The second object, `adv`, is a `data.frame` containing the advised catch by stock. The expected variable names are `advice` by `stock`. Optionally, the advice levels associated with Fmsy upper (`upper`) and Fmsy lower (`lower`) can be included. Where Fmsy upper or Fmsy lower advice levels are not applicable, one should duplicate the advice levels (e.g. no Fmsy upper advice is given for COD-NS given it's poor status, SSB < Btrigger, in the advice year).
 
 ```{r plot_catchScenStk_adv_prep, include=FALSE}
 # make data.frame of advice reference values 
@@ -159,7 +162,9 @@ See `?plot_catchScenStk` for further argument details.
 
 ## Fleet effort restriction plot
 
-Two main objects are used by the `plot_effortFltStk` function: a `data` object and a `refTable` object containing information on plotting colors for added consistency across sevel subsequent plots. 
+Two main objects are used by the `plot_effortFltStk` function: a `data` object and a `refTable` object containing information on plotting colors for added consistency across several subsequent plots. 
+
+The `data` object contains the effort required for each `fleet` to take up it's quota share (`quotaEffort`) of each `stock`. In addition, the status quo effort (`sqEffort`) by fleet is provided for reference. This should be each fleet's respective effort used for the intermediate year in the short-term forecast. Finally, The variable `Limitation` provides information on most- and least-limiting stocks for each fleet (lowest and highest `quotaEffort`, respectively), while other stocks are buidesignated with `NA`.
 
 ```{r plot_effortFltStk_data, include=FALSE}
 data(refTable) # reference table with stock advice names, colors, order, etc.
@@ -219,6 +224,7 @@ data <- df2[,c("fleet", "stock", "catch", "Limitation", "quotaEffort", "sqEffort
 data
 ```
 
+The reference table (`refTable`) provides information on plotting `order`, and `color`, used by many subsequent plots. The variable `stock` should contain the ICES stock codes, which are used in the advice documents. In this example, the optional column `stock_short` is used as a look-up name to replace the shortened stock names used in the North Sea mixed fishery model with the ICES stock codes. A couple non-standard stocks have been added to the North Sea `refTable` ("nep.fu6-9", "Nephrops") as several plots end up grouping *Nephrops* function units (FUs) for simplicity. Similar adjustments may exist for other case studies, and the `refTable` can be adjusted accordingly.
 
 ```{r refTab}
 data("refTable")
@@ -347,7 +353,7 @@ data
 p <- plot_landByMetStock(data = data, refTable)
 
 fname <- paste0(tempfile(), ".png")
-png(fname, width = 6, height = 6, units = "in", res = 400)
+png(fname, width = 6, height = 5, units = "in", res = 400)
 print(p)
 out <- dev.off()
 
