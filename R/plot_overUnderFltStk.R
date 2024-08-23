@@ -119,8 +119,8 @@ plot_overUnderFltStk <- function(data, refTable, yExt = 0.3,
   fillLegendTitle = "Stock", colLegendTitle = "Limiting stock"){
 
   # add over- and under-shoot
-  data$catchOver <- data$catch * data$quotaUpt
-  data$catchUnder <- -1 * (data$catch * (1-data$quotaUpt))
+  data$catchOver <- data$catch
+  data$catchUnder <- ifelse(data$quotaUpt < 1, -1 * (data$catch*(1-data$quotaUpt)), 0)
 
   tmp <- as.data.frame(by(data = data, INDICES = data$fleet,
     FUN = function(x){
@@ -154,7 +154,7 @@ plot_overUnderFltStk <- function(data, refTable, yExt = 0.3,
       mapping = aes(y = catchOver + yExt)) +
     geom_blank(data = subset(data, Limitation == "least"),
       mapping = aes(y = catchUnder - yExt)) +
-    scale_color_manual(values = c('green', 'red'), na.value = NA,
+    scale_color_manual(values = c('green', 'red'), na.value = 'black',
       limits = c('least','most'), labels = c("least (#)", "most (*)")) +
     geom_text(data = subset(data, Limitation == "most"), mapping = aes(label = "*"),
       vjust = 0.3, show.legend = FALSE) +
