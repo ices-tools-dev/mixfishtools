@@ -15,10 +15,10 @@ library(remotes)
 install_github(repo = "ices-tools-dev/mixfishtools")
 ```
 
-**mixfishtools vignette [to come]**
+**mixfishtools vignette**
 
-A tutorial will come :
+An Rmarkdown tutorial can be found in 'vignettes/mixfishtoolsGuide.Rmd' 
 
--   Word [<https://github.com/ices-tools-dev/mixfishtools/blob/main/doc/WGMIXFISH_best_practices.docx>]
+You can build this using `devtools::build_vignettes()`, or during installation, with `remotes::install_github(repo = "ices-tools-dev/mixfishtools", build_vignettes = TRUE)`. The vignette can then be viewed in your browser, using `browseVignettes(package = "mixfishtools")`.
 
--   Rmarkdown [<https://github.com/ices-tools-dev/mixfishtools/blob/main/vignettes/BestPractices.Rmd>]
+
