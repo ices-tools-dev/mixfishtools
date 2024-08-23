@@ -16,11 +16,12 @@ plot_catchScenStk(
 \item{data}{data.frame Contains catch (`catch`) by scenario (`scenario`) and
 stock (`stock`).}
 
-\item{adv}{data.frame Contains advice (`advice`) by stock (`stock`). Optional
-upper (`upper`) and lower (`lower`) advice limits can be included.}
+\item{adv}{data.frame Contains advice (`advice`) by stock (`stock`).
+Optional upper (`upper`) and lower (`lower`) advice limits can be included.}
 
 \item{ofwhich}{logical. If TRUE an of which limit will be plotted.
-Requires a 'catch_ofwhich' column in data and an 'advice_ofwhich' column in adv.}
+Requires a 'catch_ofwhich' column in data and an 'advice_ofwhich'
+column in adv.}
 
 \item{xlab}{character X-axis label (Default: `xlab = "Scenario"`)}
 
@@ -48,7 +49,8 @@ restr.stks <- c("COD-NS", "HAD", "PLE-EC", "PLE-NS", "POK", "SOL-EC",
 stfFltStkSum <- subset(stfFltStkSum, year == advYr & stock \%in\% restr.stks)
 
 # data for plotting (catch by scenario and stock)
-catchScenStk <- aggregate(catch ~ scenario + stock, data = stfFltStkSum, FUN = sum)
+catchScenStk <- aggregate(catch ~ scenario + stock, data = stfFltStkSum,
+  FUN = sum)
 
 # re-order scenarios (sq_E, max, min, ... )
 catchScenStk$scenario <- factor(catchScenStk$scenario,
@@ -60,7 +62,8 @@ catchRange <- rbind(
   data.frame(stock = "COD-NS", advice = 14276, lower = 9701, upper = 14276),
   data.frame(stock = "HAD", advice = 128708, lower = 111702, upper = 128708),
   data.frame(stock = "PLE-EC", advice = 6365, lower = 4594, upper = 6365),
-  data.frame(stock = "PLE-NS", advice = 142507, lower = 101854, upper = 195622),
+  data.frame(stock = "PLE-NS", advice = 142507, lower = 101854,
+    upper = 195622),
   data.frame(stock = "POK", advice = 49614, lower = 30204, upper = 49614),
   data.frame(stock = "SOL-EC", advice = 1810, lower = 1068, upper = 2069),
   data.frame(stock = "SOL-NS", advice = 15330, lower = 9523, upper = 21805),
@@ -68,6 +71,15 @@ catchRange <- rbind(
   data.frame(stock = "WHG-NS", advice = 88426, lower = 70169, upper = 91703),
   data.frame(stock = "WIT", advice = 1206, lower = 875, upper = 1206)
 )
+
+# use ICES stock codes
+data(refTable)
+head(refTable)
+catchScenStk$stock <- refTable$stock[match(catchScenStk$stock,
+  refTable$stock_short)]
+catchRange$stock <- refTable$stock[match(catchRange$stock,
+  refTable$stock_short)]
+
 
 # plot without range
 p <- plot_catchScenStk(data = catchScenStk, adv = catchRange[,1:2])

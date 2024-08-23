@@ -30,12 +30,15 @@
 #' @export
 #'
 #' @examples
-#' # make example data
-#'
+#' # make data
+#' data(refTable) # reference table with stock advice names, colors, order, etc.
 #' data(stfFltSum) # summary of fleet-related variables (e.g. effort)
 #' data(stfFltStkSum) # summary of fleet/stock-related catch variables
+#'
+#' ## get data from advice year
 #' advYr <- 2022 # advice year
 #' df <- subset(stfFltStkSum, scenario == "min" & year == advYr)
+#'
 #' eff <- subset(
 #'   stfFltSum, scenario == "min" & year == advYr)[,c("fleet", "effort")]
 #' sqEff <- subset(
@@ -45,10 +48,19 @@
 #' df <- merge(x = df, y = eff, all.x = TRUE)
 #' df$quotaEffort <- df$effort / df$quotaUpt
 #' df$relEffort <- df$quotaEffort / df$sqEffort
-#' df$scenario <- df$stock
+#'
+#' # df$scenario <- df$stock
+#'
 #' restr.stks <- c("COD-NS", "HAD", "PLE-EC", "PLE-NS", "POK", "SOL-EC",
 #'   "SOL-NS", "TUR", "WHG-NS", "WIT", "NEP6", "NEP7", "NEP8", "NEP9")
 #' df <- subset(df, stock %in% restr.stks)
+#'
+#' # replace short stock names with ICES stock codes
+#' df$stock <- refTable$stock[match(df$stock, refTable$stock_short)]
+#'
+#' # adjust stock order for the plot
+#' df$stock <- factor(df$stock, levels = refTable$stock)
+#'
 #'
 #' # convert to percentage change
 #' df$var <- 100*(df$relEffort-1)
@@ -71,7 +83,7 @@ plot_relEffortFltStk <- function(data,
   fillLegendTitle = "Variation\n in effort"){
 
   p <- ggplot(data) +
-    aes(x = scenario, y = fleet,  fill = var) +
+    aes(x = stock, y = fleet,  fill = var) +
     geom_tile(color = "white", lwd = 1, linetype = 1) +
     scale_fill_gradient2(name = "Variation\n in effort",
       limits = limits,

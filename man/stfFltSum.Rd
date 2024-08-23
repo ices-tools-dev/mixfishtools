@@ -21,16 +21,29 @@ The \code{stfFltSum} data.frame is an output of
   `plot_effortFltStk`.
 
 \itemize{
-  \item year - advice year
+  \item scenario - scenario name
+  \item year - year
   \item fleet - fleet names
-  \item stock - stock names used in mixed fishery model
-  \item Advice_name - stock code labels
-  \item Limitation - by fleet, identifies limiting stocks
-    (levels: choke, interm., least). Describes the most-, intermediate-,
-    and least-limiting quotas based on quota uptake ratios (quotaUpt).
-  \item quotaEffort - effort required to take up quota in advice year
-  \item sqE_effort - status quo effort from last data year
-  \item rel_effort - ratio of quota_effort / sqE_effort
+  \item iter - iteration number
+  \item catch -
+  \item landings -
+  \item discards -
+  \item capacity -
+  \item effort -
+  \item fcosts -
+  \item vcosts -
+  \item costs -
+  \item grossValue -
+  \item nVessels -
+  \item discRat -
+  \item grossSurplus -
+  \item price -
+  \item salaries -
+  \item gva -
+  \item profitability -
+  \item fep -
+  \item netProfit -
+  \item quotaUptake - effort required to take up quota
 }
 }
 \examples{

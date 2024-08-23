@@ -1,12 +1,12 @@
-#' Plot fleet effort to uptake stock quotas
+#' Plot over- and undershoot of stock quotas by fleet
 #'
-#' @description Plot of effort required to uptake each stock's quota
+#' @description Plot of over- and undershoot of each stock's quota
 #'   by fleet. Most- and least-limiting stocks are also
-#'   denoted. Used in WGMIXFISH-ADVICE.
+#'   denoted.
 #'
 #' @param data data.frame Contains information on effort required to uptake
 #'   quotas by fleet and stock, plus designation of each stock's limitation
-#'   status to the fleet's fishing effort. Stock variable names (`stock`)
+#'   status to the fleet's fishing effort. Stock variable names (`Advice_name`)
 #'   should match those of \code{\link[mixfishtools]{refTable}}.
 #'   Other required variables include: `Limitation` - defines, by fleet, the
 #'   most- (`most`), least- (`least`), and intermediate-limiting (`NA`)
@@ -14,20 +14,24 @@
 #'   quota share of each stock; `sqEffort` - status quo effort corresponding
 #'   to most recent data year before forecast.
 #' @param refTable data.frame Contains stock look-up information for consistent
-#'   plotting of stocks. `stock` defines the stock names corresponding to
+#'   plotting of stocks. `Advice_name` defines the stock names corresponding to
 #'   `data` object. `col` defines the color used to fill bars in plot.
 #'   `order` defines the order of stocks in the plot facets.
-#' @param xlab character X-axis label (Default: `xlab = "Stock"`)
-#' @param ylab character Y-axis label (Default: `ylab = "KW days ('000)"`)
+#' @param xlab character X-axis label (Default: xlab = "Stock")
+#' @param ylab character Y-axis label (Default: ylab = "Predicted catch [t]
+#'   with advice undershoot (negative extent)")
+#' @param yExt Fraction of absolute range to extend y-axis for each fleet
+#'    facet (Default: yExt = 0.3).
+#' @param borderSize line width of border around bars (Default: borderSize=0.5)
 #' @param fillLegendTitle character Fill legend title
-#'   (Default: `fillLegendTitle = "Effort stock"`)
+#'   (Default: `fillLegendTitle = "Stock"`)
 #' @param colLegendTitle character Color legend title
 #'   (Default: `colLegendTitle = "Limiting stock"`)
 #'
 #' @details Users will need to provide the data and reference table objects to
 #'   produce the plot.
 #'   In the best case, effort associated with complete quota uptake by
-#'   fleet (`data$quotaEffort`) may be derived from scenarios restricting fleet
+#'   fleet (`data$effortQuota`) may be derived from scenarios restricting fleet
 #'   catch one stock at a time. In the following example, however, effort
 #'   levels are derived by linearly extrapolating the quota uptake levels
 #'   by the effort of the "min" scenario. This is strictly linear when quotas
@@ -64,6 +68,7 @@
 #' df <- merge(x = df, y = eff, all.x = TRUE)
 #' df$quotaEffort <- df$effort / df$quotaUpt
 #'
+#'
 #' ## Determine most- and least-limiting stock by fleet
 #' # restrictive stocks
 #' restr.stks <- c("COD-NS", "HAD", "PLE-EC", "PLE-NS", "POK", "SOL-EC",
@@ -96,18 +101,36 @@
 #'
 #'
 #' # plot
-#' p <- plot_effortFltStk(data = df2, refTable = refTable)
-#' # png("effortFltStk1.png", width = 8, height = 10, units = "in", res = 400)
+#' p <- plot_overUnderFltStk(data = df2, refTable = refTable)
+#' p
+#' # png("overUnderFltStk1.png", width = 8, height = 10, units = "in", res = 400)
 #' # print(p); dev.off()
 #'
 #' # adjust ggplot2 settings
 #' p <- p + theme(text = element_text(size = 12))
-#' # png("effortFltStk2.png", width = 8, height = 10, units = "in", res = 400)
+#' p
+#' # png("overUnderFltStk2.png", width = 8, height = 10, units = "in", res = 400)
 #' # print(p); dev.off()
 #'
-plot_effortFltStk <- function(data, refTable,
-  xlab = "Stock", ylab = "KW days ('000)",
+#'
+plot_overUnderFltStk <- function(data, refTable, yExt = 0.3,
+  xlab = "Stock", ylab = "Predicted catch [t] with advice undershoot (negative extent)",
+  borderSize = 0.5,
   fillLegendTitle = "Stock", colLegendTitle = "Limiting stock"){
+
+  # add over- and under-shoot
+  data$catchOver <- data$catch
+  data$catchUnder <- ifelse(data$quotaUpt < 1, -1 * (data$catch*(1-data$quotaUpt)), 0)
+
+  tmp <- as.data.frame(by(data = data, INDICES = data$fleet,
+    FUN = function(x){
+      abs(diff(range(c(x$catchOver, x$catchUnder), na.rm = TRUE)))*yExt
+    },
+    simplify = TRUE))
+  names(tmp) <- "yExt"
+  tmp$fleet = rownames(tmp)
+
+  data <- merge(x = data, y = tmp, all.x = TRUE)
 
   stkFill <- data.frame(stock = unique(data$stock))
   stkFill <- merge(x = stkFill, y = refTable, all.x = TRUE)
@@ -118,24 +141,32 @@ plot_effortFltStk <- function(data, refTable,
   stkColorScale <- scale_colour_manual(
     name = fillLegendTitle, values = stkColors, aesthetics = c("fill"))
 
-  data$stock <- factor(data$stock, levels = stkFill$stock) # orders the stocks
+  data$stock <- factor(data$stock, levels = stkFill$stock)
 
   p <- ggplot(data) +
-    aes(x = stock, y = quotaEffort,
+    aes(x = stock, y = catchOver,
       fill = stock, color = Limitation, group = fleet) +
     facet_wrap(fleet~., scales = 'free_y', ncol = 3) +
-    geom_bar(stat = 'identity', size = 1, alpha = 0.7) +
-    geom_hline(data=data, aes(yintercept = sqEffort), lty=2) +
-    scale_color_manual(values = c('green', 'red'), na.value = NA,
-      limits = c('least','most'), labels = c("least", "most (*)")) +
-    geom_text(data = subset(data, Limitation == "most"), aes(label = "*"),
-      vjust = 0.2, show.legend = FALSE) +
+    geom_hline(data = data, aes(yintercept = 0), lty=3, color = "grey") +
+    geom_col(linewidth = borderSize, alpha = 1) +
+    geom_col(mapping = aes(y = catchUnder), linewidth = borderSize, alpha = 1) +
+    geom_blank(data = subset(data, Limitation == "most"),
+      mapping = aes(y = catchOver + yExt)) +
+    geom_blank(data = subset(data, Limitation == "least"),
+      mapping = aes(y = catchUnder - yExt)) +
+    scale_color_manual(values = c('green', 'red'), na.value = 'black',
+      limits = c('least','most'), labels = c("least (#)", "most (*)")) +
+    geom_text(data = subset(data, Limitation == "most"), mapping = aes(label = "*"),
+      vjust = 0.3, show.legend = FALSE) +
+    geom_text(data = subset(data, Limitation == "least"),
+      mapping = aes(y = catchUnder, label = deparse(bquote(''['#']))),
+      vjust = 1.1, show.legend = FALSE, parse = TRUE) +
     xlab(xlab) +
     ylab(ylab) +
     stkColorScale +
     theme_bw() +
     theme(
-      axis.text.x = element_text(angle = -90, hjust = 0, vjust = 0.3, size = 7),
+      axis.text.x = element_text(angle = -90, hjust = 0, vjust = 0, size = 7),
       panel.grid = element_blank(),
       text = element_text(size = 9),
       strip.text = element_text(size = 9)) +
@@ -143,9 +174,9 @@ plot_effortFltStk <- function(data, refTable,
       fill = guide_legend(order = 1)) +
     labs(fill = fillLegendTitle, color = colLegendTitle)
 
-
   return(p)
 }
+
 
 
 

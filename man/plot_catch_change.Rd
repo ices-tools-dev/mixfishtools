@@ -69,7 +69,12 @@ data(refTable) # reference table with stock advice names, colors, order, etc.
 data(stfFltStkSum) # summary of fleet/stock-related catch variables
 advYr <- 2022 # advice year
 
-plot_catch_change(data = stfFltStkSum,
+# replace short stock names with ICES stock codes
+stfFltStkSum$stock <- refTable$stock[match(stfFltStkSum$stock,
+  refTable$stock_short)]
+
+
+p <- plot_catch_change(data = stfFltStkSum,
  basis = "Quota",
  dataYrs = 2020:2022,
  advYr = advYr,
@@ -80,5 +85,11 @@ plot_catch_change(data = stfFltStkSum,
  ylab = "landings change (tonnes)",
  fillLegendTitle = "Stock",
  colLegendTitle = "Limiting stock")
+
+print(p)
+
+# export plot
+# png("plot_change.png", width = 8, height = 10, units = "in", res = 400)
+# print(p); dev.off()
 
 }
