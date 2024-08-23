@@ -1,5 +1,5 @@
 ---
-title: "WGMIXFISH guide to output"
+title: "Guide to mixfishtools package"
 header-includes:
 - \usepackage{pdflscape}
 - \newcommand{\blandscape}{\begin{landscape}}
