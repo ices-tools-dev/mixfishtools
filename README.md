@@ -4,6 +4,8 @@
 
 [![:registry status badge](https://ices-tools-prod.r-universe.dev/badges/mixfishtools)](https://ices-tools-prod.r-universe.dev)
 
+[![Build package](https://github.com/r-universe/ices-tools-prod/actions/workflows/build.yml/badge.svg)](https://github.com/r-universe/ices-tools-prod/actions/workflows/build.yml)
+
 **To install:**
 
 ```         
@@ -17,8 +19,6 @@ install_github(repo = "ices-tools-dev/mixfishtools")
 
 **mixfishtools vignette**
 
-An Rmarkdown tutorial can be found in 'vignettes/mixfishtoolsGuide.Rmd' 
+An Rmarkdown tutorial can be found in 'vignettes/mixfishtoolsGuide.Rmd'
 
 You can build this using `devtools::build_vignettes()`, or during installation, with `remotes::install_github(repo = "ices-tools-dev/mixfishtools", build_vignettes = TRUE)`. The vignette can then be viewed in your browser, using `browseVignettes(package = "mixfishtools")`.
-
-
