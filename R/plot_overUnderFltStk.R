@@ -166,7 +166,7 @@ plot_overUnderFltStk <- function(data, refTable, yExt = 0.3,
     stkColorScale +
     theme_bw() +
     theme(
-      axis.text.x = element_text(angle = -90, hjust = 0, vjust = 0, size = 7),
+      axis.text.x = element_text(angle = -90, hjust = 1, vjust = 0.3, size = 7),
       panel.grid = element_blank(),
       text = element_text(size = 9),
       strip.text = element_text(size = 9)) +
