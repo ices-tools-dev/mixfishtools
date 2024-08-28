@@ -122,13 +122,14 @@ plot_overUnderFltStk <- function(data, refTable, yExt = 0.3,
   data$catchOver <- data$catch
   data$catchUnder <- ifelse(data$quotaUpt < 1, -1 * (data$catch*(1-data$quotaUpt)), 0)
 
-  tmp <- as.data.frame(by(data = data, INDICES = data$fleet,
-    FUN = function(x){
-      abs(diff(range(c(x$catchOver, x$catchUnder), na.rm = TRUE)))*yExt
-    },
-    simplify = TRUE))
-  names(tmp) <- "yExt"
-  tmp$fleet = rownames(tmp)
+
+  tmp <- data %>%
+    group_by(fleet) %>%
+    summarize(result = abs(diff(range(c(catchOver, catchUnder), na.rm = TRUE))) * yExt) %>%
+    as.data.frame()
+
+  names(tmp)[2] <- "yExt"
+  # tmp$fleet = rownames(tmp)
 
   data <- merge(x = data, y = tmp, all.x = TRUE)
 
