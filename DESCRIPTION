@@ -10,6 +10,8 @@ Description: Contains plot templates used in WGMIXFISH-ADVICE and Fisheries
 Depends:
     R (>= 4.0),
     ggplot2,
+    ggrepel,
+    ggalluvial,
     htmlwidgets,
     networkD3,
     htmltools,

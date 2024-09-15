@@ -2,6 +2,7 @@
 
 export(gm_mean)
 export(plot_MetMetFleet)
+export(plot_catchAlluvial)
 export(plot_catchComp)
 export(plot_catchScenStk)
 export(plot_catch_change)
