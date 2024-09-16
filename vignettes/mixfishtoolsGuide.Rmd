@@ -468,7 +468,7 @@ knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 
 ## Over-/under-quota plot
 
-Two main objects are used by the `plot_overUnderFltStk` function: a `data` object and the `refTable` object. 
+Two main objects used by the `plot_overUnderFltStk` function: a `data` object and the `refTable` object. 
 
 The `data` object contains the `catch` per stock and fleet, and associated quota uptake (`quotaUpt`), which is the ratio of the catch to the fleet's quota share (i.e. a value of `1.0` means full uptake). Finally, The variable `Limitation` provides information on most- and least-limiting stocks for each fleet (lowest and highest `quotaEffort`, respectively), while other stocks are designated with `NA`.
 
@@ -545,4 +545,79 @@ tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 ```
 
+
+
+## Catch alluvial plot
+
+Two main objects used by the `plot_catchAlluvial` function: a `data` object and the `refTable` object. 
+
+The `data` object contains the catches or landings (variable `value`) per `fleet`, `metier` and `stock`. The typical `refTable` object is also used to, which contains the corresponding colors (`col`), plotting order (`order`) for each `stock`.
+
+```{r plot_catchAlluvial_data_prep, include=FALSE}
+data("stfMtStkSum")
+data("refTable")
+
+## create catch data by fleet, metier, and stock
+dataYr <- 2020
+# add country for filter (if desired)
+stfMtStkSum$country <- unlist(lapply(strsplit(stfMtStkSum$fleet, "_"), 
+  function(x){x[1]}))
+# filter data
+data <- subset(stfMtStkSum, year == 2020 & scenario == "min" &
+  country == "BE")[,c("fleet", "metier", "stock", "landings")]
+data$stock <- refTable$stock[match(data$stock, refTable$stock_short)]
+names(data)[4] <- "value"
+```
+
+```{r plot_catchAlluvial_data}
+data[1:100,]
+```
+
+
+
+```{r plot_catchAlluvial_output, out.width="70%", out.height="70%"}
+p <- plot_catchAlluvial(data = data, refTable = refTable, text_size = 2)
+
+fname <- paste0(tempfile(), ".png")
+png(fname, width = 6, height = 6, units = "in", res = 400)
+suppressWarnings(print(p))
+out <- dev.off()
+
+tmp <- png::readPNG(fname)
+knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
+```
+
+As in the above example, labels may overlap with many levels or small contributions. The plotting function has the option to try and arrange the labels to prevent overlapping using the `ggrepel` package (argument: `text_repel = TRUE`):
+
+
+```{r plot_catchAlluvial_output2, out.width="70%", out.height="70%"}
+p <- plot_catchAlluvial(data = data, refTable = refTable, text_size = 2, 
+  text_repel = TRUE, stratum_width = 0.2, nudge_x = 0.3, mult_x = c(0.1, 0.3))
+
+fname <- paste0(tempfile(), ".png")
+png(fname, width = 6, height = 6, units = "in", res = 400)
+suppressWarnings(print(p))
+out <- dev.off()
+
+tmp <- png::readPNG(fname)
+knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
+```
+
+
+By default, the plot contains a legend as to the fill colors of the stocks. This may be removed if the final stock stratum colors are labelled clearly enough (argument: `addLegend = FALSE`). The following example also defines a different fill color for the non-stock strata:
+
+
+```{r plot_catchAlluvial_output3, out.width="70%", out.height="70%"}
+p <- plot_catchAlluvial(data = data, refTable = refTable, text_size = 2, 
+  text_repel = TRUE, stratum_width = 0.2, nudge_x = 0.3, mult_x = c(0.1, 0.3), 
+  addLegend = FALSE, stratum_col = "grey90")
+
+fname <- paste0(tempfile(), ".png")
+png(fname, width = 6, height = 6, units = "in", res = 400)
+suppressWarnings(print(p))
+out <- dev.off()
+
+tmp <- png::readPNG(fname)
+knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
+```
 
