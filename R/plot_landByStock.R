@@ -79,7 +79,8 @@ plot_landByStock <- function(data, refTable, ylab = "Landings [t]",
   stkColorScale <- scale_colour_manual(name = "stock", values = stkColors,
     aesthetics = c("colour", "fill"))
 
-  data$stock <- factor(data$stock, levels = tmp$stock) # orders the stocks
+  # ensure plotting order
+  data$stock <- factor(data$stock, levels = tmp$stock)
 
   p <- ggplot(data, aes(x = "", y = value, fill = stock)) +
     geom_bar(width = 1, stat = "identity") +
@@ -94,7 +95,8 @@ plot_landByStock <- function(data, refTable, ylab = "Landings [t]",
       colour = "black", show.legend = FALSE) +
     theme(legend.text = element_text(face = "bold", size = 10),
       legend.title = element_text(face = "bold", size = 10)
-    )
+    ) +
+    stkColorScale
 
   return(p)
 }

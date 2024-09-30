@@ -118,7 +118,8 @@ plot_effortFltStk <- function(data, refTable,
   stkColorScale <- scale_colour_manual(
     name = fillLegendTitle, values = stkColors, aesthetics = c("fill"))
 
-  data$stock <- factor(data$stock, levels = stkFill$stock) # orders the stocks
+  # ensure plotting order
+  data$stock <- factor(data$stock, levels = stkFill$stock)
 
   p <- ggplot(data) +
     aes(x = stock, y = quotaEffort,

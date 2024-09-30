@@ -135,7 +135,8 @@ plot_catchComp <- function(data, refTable, filters=NULL,
   stkColorScale <- scale_colour_manual(name = "stock", values = stkColors,
     aesthetics = c("colour", "fill"))
 
-  data$stock <- factor(data$stock, levels = tmp$stock) # orders the stocks
+  # ensure plotting order
+  data$stock <- factor(data$stock, levels = tmp$stock)
 
   # plot
   p <- ggplot(data,aes(x=label,y=VAR,colour=stock,fill=stock))+
