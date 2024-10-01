@@ -92,7 +92,7 @@ plot_landByMetStock <- function(data, refTable, xlab = "",
   tmp <- tmp[order(tmp$order),]
   stkColors <- tmp$col
   names(stkColors) <- tmp$stock
-  stkColorScale <- scale_colour_manual(name = "stock", values = stkColors,
+  stkColorScale <- scale_colour_manual(name = fillLegendTitle, values = stkColors,
     aesthetics = c("colour", "fill"))
 
   data$stock <- factor(data$stock, levels = tmp$stock) # orders the stocks
@@ -113,7 +113,7 @@ plot_landByMetStock <- function(data, refTable, xlab = "",
           legend.title=element_text(face="bold",size=8)) +
     theme(axis.text = element_text(lineheight=0.8, size=8,face="bold")) +
     theme(axis.title = element_text(size=12,face="bold")) +
-    geom_bar(stat="identity",position = "stack",colour="black", show.legend=FALSE) +
+    geom_bar(stat="identity",position = "stack",colour="black") +
     stkColorScale
 
   return(p)

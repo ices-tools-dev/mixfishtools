@@ -76,7 +76,7 @@ plot_landByStock <- function(data, refTable, ylab = "Landings [t]",
   tmp <- tmp[order(tmp$order),]
   stkColors <- tmp$col
   names(stkColors) <- tmp$stock
-  stkColorScale <- scale_colour_manual(name = "stock", values = stkColors,
+  stkColorScale <- scale_colour_manual(name = fillLegendTitle, values = stkColors,
     aesthetics = c("colour", "fill"))
 
   # ensure plotting order
