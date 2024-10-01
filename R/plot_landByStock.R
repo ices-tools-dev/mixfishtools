@@ -84,7 +84,6 @@ plot_landByStock <- function(data, refTable, ylab = "Landings [t]",
 
   p <- ggplot(data, aes(x = "", y = value, fill = stock)) +
     geom_bar(width = 1, stat = "identity") +
-    scale_fill_manual(values = data$col)+
     coord_polar("y", start = 0) +
     theme(axis.text.x = element_blank(),
       panel.border= element_blank(),
