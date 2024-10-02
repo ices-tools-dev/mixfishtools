@@ -76,7 +76,7 @@
 #' plot_landByMetStock(data = agg, refTable)
 #'
 plot_landByMetStock <- function(data, refTable, xlab = "",
-  ylab = "Landings [t]", fillLegendTitle = "Stock"){
+  ylab = "Landings ['000 t]", fillLegendTitle = "Stock"){
 
   if(is.null(data)){
     stop("object, data, does not exist")

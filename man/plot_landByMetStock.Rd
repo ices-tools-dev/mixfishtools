@@ -8,7 +8,7 @@ plot_landByMetStock(
   data,
   refTable,
   xlab = "",
-  ylab = "Landings [t]",
+  ylab = "Landings ['000 t]",
   fillLegendTitle = "Stock"
 )
 }

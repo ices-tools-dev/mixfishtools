@@ -120,7 +120,7 @@ plot_catchScenStk <- function(data, adv, ofwhich = FALSE,
     ylab(label = ylab) +
     theme(
       text = element_text(size = 10), legend.position="none",
-      axis.text.x = element_text(angle = 90, vjust = 0, hjust=1))
+      axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
   return(p)
 }
