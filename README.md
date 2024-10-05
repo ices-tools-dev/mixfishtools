@@ -2,7 +2,7 @@
 
 # mixfishtools
 
-[![:registry status badge](https://ices-tools-prod.r-universe.dev/badges/mixfishtools)](https://ices-tools-prod.r-universe.dev) [![Build package](https://github.com/r-universe/ices-tools-prod/actions/workflows/build.yml/badge.svg)](https://github.com/r-universe/ices-tools-prod/actions/workflows/build.yml)
+[![:registry status badge](https://ices-tools-prod.r-universe.dev/badges/mixfishtools)](https://ices-tools-prod.r-universe.dev) 
 
 **To install:**
 
