@@ -100,12 +100,11 @@ plot_catchScenStk <- function(data, adv, ofwhich = FALSE,
       mapping = aes(xmin = -Inf, xmax = Inf, ymin = upper, ymax = Inf),
       fill = 'red', alpha = 0.25) +
     {if(ofwhich==T) {
-      geom_rect_pattern(stat = "identity", data = adv,
-        mapping = aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = advice_ofwhich, y = 1),
-        fill = NA,
-        pattern = "circle",
-        pattern_colour = NA,
-        pattern_fill = "#85AD00") }} +
+      geom_rect_pattern(stat = "identity", data = adv, inherit.aes = F,
+        mapping = aes(xmin = -Inf, xmax = Inf, ymin = 0,
+          ymax = advice_ofwhich, y = 1), fill = NA,
+        pattern = "circle", pattern_colour = NA, pattern_fill = "#85AD00")
+      }} +
     geom_hline(data = adv, mapping = aes(yintercept = advice), lty = 1, col = "black") +
     geom_hline(data = adv, mapping = aes(yintercept = upper), lty = 3) +
     geom_hline(data = adv, mapping = aes(yintercept = lower), lty = 3) +

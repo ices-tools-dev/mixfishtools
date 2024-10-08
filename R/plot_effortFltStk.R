@@ -105,51 +105,35 @@
 #' # png("effortFltStk2.png", width = 8, height = 10, units = "in", res = 400)
 #' # print(p); dev.off()
 #'
-plot_effortFltStk <- function(data, refTable,
-  xlab = "Stock", ylab = "KW days ('000)",
-  fillLegendTitle = "Stock", colLegendTitle = "Limiting stock"){
-
+plot_effortFltStk <- function (data, refTable, xlab = "Stock", ylab = "KW days ('000)",
+          fillLegendTitle = "Stock", colLegendTitle = "Limiting stock")
+{
   stkFill <- data.frame(stock = unique(data$stock))
   stkFill <- merge(x = stkFill, y = refTable, all.x = TRUE)
-  stkFill <- stkFill[order(stkFill$order),]
+  stkFill <- stkFill[order(stkFill$order), ]
   stkColors <- stkFill$col
   names(stkColors) <- stkFill$stock
-
-  stkColorScale <- scale_colour_manual(
-    name = fillLegendTitle, values = stkColors, aesthetics = c("fill"))
-
-  # ensure plotting order
+  stkColorScale <- scale_colour_manual(name = fillLegendTitle,
+    values = stkColors, aesthetics = c("fill"))
   data$stock <- factor(data$stock, levels = stkFill$stock)
 
   p <- ggplot(data) +
-    aes(x = stock, y = quotaEffort,
-      fill = stock, color = Limitation, group = fleet) +
-    facet_wrap(fleet~., scales = 'free_y', ncol = 3) +
-    geom_bar(stat = 'identity', size = 1, alpha = 0.7) +
-    geom_hline(data=data, aes(yintercept = sqEffort), lty=2) +
-    scale_color_manual(values = c('green', 'red'), na.value = NA,
-      limits = c('least','most'), labels = c("least", "most (*)")) +
-    geom_text(data = subset(data, Limitation == "most"), aes(label = "*"),
-      vjust = 0.2, show.legend = FALSE) +
-    xlab(xlab) +
-    ylab(ylab) +
-    stkColorScale +
-    theme_bw() +
+    aes(x = stock, y = quotaEffort, fill = stock,
+      color = Limitation, group = fleet) +
+    facet_wrap(fleet ~ ., scales = "free_y", ncol = 3) +
+    geom_bar(stat = "identity", size = 1, alpha = 0.7) +
+    geom_hline(data = data, aes(yintercept = sqEffort), lty = 2) +
+    scale_color_manual(values = c(intermediate="black",least="green",most= "red"),
+      na.value = NA, limits = c("intermediate","least", "most"),
+      labels = c("least", "most (*)")) +
+    geom_text(data = subset(data, Limitation == "most"),
+      aes(label = "*"), vjust = 0.2, show.legend = FALSE) +
+    xlab(xlab) + ylab(ylab) + stkColorScale + theme_bw() +
     theme(
-      axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 7),
-      panel.grid = element_blank(),
-      text = element_text(size = 9),
-      strip.text = element_text(size = 9)) +
-    guides(colour = guide_legend(order = 2),
-      fill = guide_legend(order = 1)) +
+      axis.text.x = element_text(angle = 90, hjust = 1,
+      vjust = 0.5, size = 7), panel.grid = element_blank(),
+      text = element_text(size = 9), strip.text = element_text(size = 9)) +
+    guides(colour = guide_legend(order = 2), fill = guide_legend(order = 1)) +
     labs(fill = fillLegendTitle, color = colLegendTitle)
-
-
   return(p)
 }
-
-
-
-
-
-
