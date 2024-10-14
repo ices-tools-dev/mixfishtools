@@ -8,7 +8,7 @@ plot_effortFltStk(
   data,
   refTable,
   xlab = "Stock",
-  ylab = "KW days ('000)",
+  ylab = "Effort ['000 KW days]",
   fillLegendTitle = "Stock",
   colLegendTitle = "Limiting stock"
 )
@@ -31,7 +31,7 @@ plotting of stocks. `stock` defines the stock names corresponding to
 
 \item{xlab}{character X-axis label (Default: `xlab = "Stock"`)}
 
-\item{ylab}{character Y-axis label (Default: `ylab = "KW days ('000)"`)}
+\item{ylab}{character Y-axis label (Default: `ylab = "Effort ['000 KW days]"`)}
 
 \item{fillLegendTitle}{character Fill legend title
 (Default: `fillLegendTitle = "Effort stock"`)}

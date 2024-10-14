@@ -18,7 +18,7 @@
 #'   `data` object. `col` defines the color used to fill bars in plot.
 #'   `order` defines the order of stocks in the plot facets.
 #' @param xlab character X-axis label (Default: `xlab = "Stock"`)
-#' @param ylab character Y-axis label (Default: `ylab = "KW days ('000)"`)
+#' @param ylab character Y-axis label (Default: `ylab = "Effort ['000 KW days]"`)
 #' @param fillLegendTitle character Fill legend title
 #'   (Default: `fillLegendTitle = "Effort stock"`)
 #' @param colLegendTitle character Color legend title
@@ -105,7 +105,7 @@
 #' # png("effortFltStk2.png", width = 8, height = 10, units = "in", res = 400)
 #' # print(p); dev.off()
 #'
-plot_effortFltStk <- function (data, refTable, xlab = "Stock", ylab = "KW days ('000)",
+plot_effortFltStk <- function (data, refTable, xlab = "Stock", ylab = "Effort ['000 KW days]",
   fillLegendTitle = "Stock", colLegendTitle = "Limiting stock")
 {
   stkFill <- data.frame(stock = unique(data$stock))
@@ -121,8 +121,7 @@ plot_effortFltStk <- function (data, refTable, xlab = "Stock", ylab = "KW days (
     aes(x = stock, y = quotaEffort, fill = stock,
       color = Limitation, group = fleet) +
     facet_wrap(fleet ~ ., scales = "free_y", ncol = 3) +
-    geom_bar(data = subset(data, subset = !Limitation %in% c('least','most')),
-      stat = "identity", linewidth = 0.5, fill = NA, color = "black") +
+    geom_bar(stat = "identity", linewidth = 0.5, fill = NA, color = "black") +
     geom_bar(stat = "identity", linewidth = 1, alpha = 1) +
     geom_hline(data = data, aes(yintercept = sqEffort), lty = 2) +
     scale_color_manual(values = c('green', 'red'), na.value = NA,
