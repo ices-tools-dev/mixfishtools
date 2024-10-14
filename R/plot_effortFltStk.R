@@ -106,7 +106,7 @@
 #' # print(p); dev.off()
 #'
 plot_effortFltStk <- function (data, refTable, xlab = "Stock", ylab = "KW days ('000)",
-          fillLegendTitle = "Stock", colLegendTitle = "Limiting stock")
+  fillLegendTitle = "Stock", colLegendTitle = "Limiting stock")
 {
   stkFill <- data.frame(stock = unique(data$stock))
   stkFill <- merge(x = stkFill, y = refTable, all.x = TRUE)
@@ -121,11 +121,12 @@ plot_effortFltStk <- function (data, refTable, xlab = "Stock", ylab = "KW days (
     aes(x = stock, y = quotaEffort, fill = stock,
       color = Limitation, group = fleet) +
     facet_wrap(fleet ~ ., scales = "free_y", ncol = 3) +
-    geom_bar(stat = "identity", size = 1, alpha = 0.7) +
+    geom_bar(data = subset(data, subset = is.na(Limitation)), stat = "identity",
+      size = 0.5, fill = NA, color = "black") +
+    geom_bar(stat = "identity", size = 1, alpha = 1) +
     geom_hline(data = data, aes(yintercept = sqEffort), lty = 2) +
-    scale_color_manual(values = c(intermediate="black",least="green",most= "red"),
-      na.value = NA, limits = c("intermediate","least", "most"),
-      labels = c("least", "most (*)")) +
+    scale_color_manual(values = c('green', 'red'), na.value = NA,
+      limits = c('least','most'), labels = c("least", "most (*)")) +
     geom_text(data = subset(data, Limitation == "most"),
       aes(label = "*"), vjust = 0.2, show.legend = FALSE) +
     xlab(xlab) + ylab(ylab) + stkColorScale + theme_bw() +
