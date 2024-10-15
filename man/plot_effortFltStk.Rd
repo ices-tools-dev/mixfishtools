@@ -10,7 +10,9 @@ plot_effortFltStk(
   xlab = "Stock",
   ylab = "Effort ['000 KW days]",
   fillLegendTitle = "Stock",
-  colLegendTitle = "Limiting stock"
+  colLegendTitle = "Limiting stock",
+  linewidthDefault = 0.5,
+  linewidthLimitation = 1
 )
 }
 \arguments{
@@ -31,13 +33,20 @@ plotting of stocks. `stock` defines the stock names corresponding to
 
 \item{xlab}{character X-axis label (Default: `xlab = "Stock"`)}
 
-\item{ylab}{character Y-axis label (Default: `ylab = "Effort ['000 KW days]"`)}
+\item{ylab}{character Y-axis label
+(Default: `ylab = "Effort ['000 KW days]"`)}
 
 \item{fillLegendTitle}{character Fill legend title
 (Default: `fillLegendTitle = "Effort stock"`)}
 
 \item{colLegendTitle}{character Color legend title
 (Default: `colLegendTitle = "Limiting stock"`)}
+
+\item{linewidthDefault}{numeric Value for default line width of intermediate-
+limiting stocks (Default: `linewidthDefault = 0.5`)}
+
+\item{linewidthLimitation}{numeric Value for default line width of
+limiting stocks (Default: `linewidthLimitation = 1`)}
 }
 \value{
 plot output of class ggplot

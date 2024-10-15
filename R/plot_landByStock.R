@@ -82,17 +82,15 @@ plot_landByStock <- function(data, refTable, ylab = "Landings [t]",
   # ensure plotting order
   data$stock <- factor(data$stock, levels = tmp$stock)
 
-  p <- ggplot(data, aes(x = "", y = value, fill = stock)) +
-    geom_bar(width = 1, stat = "identity") +
+  p <- ggplot(data, aes(x = "", y = value, fill = stock, color = "black")) +
+    geom_bar(width = 1, stat = "identity", colour = "black") +
     coord_polar("y", start = 0, direction = -1) +
     theme(axis.text.x = element_blank(),
       panel.border= element_blank(),
       panel.background = element_blank(),
       axis.ticks = element_blank()) +
     labs(x="", y = ylab, fill = fillLegendTitle) +
-    geom_bar(width = 1, stat = "identity",
-      colour = "black", show.legend = FALSE) +
-    theme(legend.text = element_text(face = "bold", size = 10),
+    theme(legend.text = element_text(size = 10),
       legend.title = element_text(face = "bold", size = 10)
     ) +
     stkColorScale

@@ -18,11 +18,16 @@
 #'   `data` object. `col` defines the color used to fill bars in plot.
 #'   `order` defines the order of stocks in the plot facets.
 #' @param xlab character X-axis label (Default: `xlab = "Stock"`)
-#' @param ylab character Y-axis label (Default: `ylab = "Effort ['000 KW days]"`)
+#' @param ylab character Y-axis label
+#'   (Default: `ylab = "Effort ['000 KW days]"`)
 #' @param fillLegendTitle character Fill legend title
 #'   (Default: `fillLegendTitle = "Effort stock"`)
 #' @param colLegendTitle character Color legend title
 #'   (Default: `colLegendTitle = "Limiting stock"`)
+#' @param linewidthDefault numeric Value for default line width of intermediate-
+#'   limiting stocks (Default: `linewidthDefault = 0.5`)
+#' @param linewidthLimitation numeric Value for default line width of
+#'   limiting stocks (Default: `linewidthLimitation = 1`)
 #'
 #' @details Users will need to provide the data and reference table objects to
 #'   produce the plot.
@@ -105,8 +110,10 @@
 #' # png("effortFltStk2.png", width = 8, height = 10, units = "in", res = 400)
 #' # print(p); dev.off()
 #'
-plot_effortFltStk <- function (data, refTable, xlab = "Stock", ylab = "Effort ['000 KW days]",
-  fillLegendTitle = "Stock", colLegendTitle = "Limiting stock")
+plot_effortFltStk <- function(data, refTable,
+  xlab = "Stock", ylab = "Effort ['000 KW days]",
+  fillLegendTitle = "Stock", colLegendTitle = "Limiting stock",
+  linewidthDefault = 0.5, linewidthLimitation = 1)
 {
   stkFill <- data.frame(stock = unique(data$stock))
   stkFill <- merge(x = stkFill, y = refTable, all.x = TRUE)
@@ -121,8 +128,9 @@ plot_effortFltStk <- function (data, refTable, xlab = "Stock", ylab = "Effort ['
     aes(x = stock, y = quotaEffort, fill = stock,
       color = Limitation, group = fleet) +
     facet_wrap(fleet ~ ., scales = "free_y", ncol = 3) +
-    geom_bar(stat = "identity", linewidth = 0.5, fill = NA, color = "black") +
-    geom_bar(stat = "identity", linewidth = 1, alpha = 1) +
+    geom_bar(stat = "identity", linewidth = linewidthDefault, fill = NA,
+      color = "black") +
+    geom_bar(stat = "identity", linewidth = linewidthLimitation) +
     geom_hline(data = data, aes(yintercept = sqEffort), lty = 2) +
     scale_color_manual(values = c('green', 'red'), na.value = NA,
       limits = c('least','most'), labels = c("least", "most (*)")) +
@@ -133,7 +141,10 @@ plot_effortFltStk <- function (data, refTable, xlab = "Stock", ylab = "Effort ['
       axis.text.x = element_text(angle = 90, hjust = 1,
       vjust = 0.5, size = 7), panel.grid = element_blank(),
       text = element_text(size = 9), strip.text = element_text(size = 9)) +
-    guides(colour = guide_legend(order = 2), fill = guide_legend(order = 1)) +
+    guides(
+      colour = guide_legend(order = 2, override.aes = list(fill = NA)),
+      fill = guide_legend(order = 1,
+        override.aes = list(color = "black", linewidth = linewidthDefault))) +
     labs(fill = fillLegendTitle, color = colLegendTitle)
   return(p)
 }
