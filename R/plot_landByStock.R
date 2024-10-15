@@ -89,9 +89,9 @@ plot_landByStock <- function(data, refTable, ylab = "Landings [t]",
       panel.border= element_blank(),
       panel.background = element_blank(),
       axis.ticks = element_blank()) +
-    labs(x="", y = ylab, fill = fillLegendTitle) +
+    labs(x=element_blank(), y = element_blank(), fill = fillLegendTitle) +
     theme(legend.text = element_text(size = 10),
-      legend.title = element_text(face = "bold", size = 10)
+      legend.title = element_text(size = 10)
     ) +
     stkColorScale
 

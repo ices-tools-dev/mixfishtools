@@ -13,9 +13,10 @@ plot_landByMetStock(
 )
 }
 \arguments{
-\item{data}{data.frame Contains information on the landings (or catch) by stock
-and metiers/gear grouping from the fleet data used at WGMIXFISH-ADVICE. Stock
-variable names (`stock`) should match those of \code{\link[mixfishtools]{refTable}}.}
+\item{data}{data.frame Contains information on the landings (or catch) in
+tonnes by stock and metier/gear grouping from the fleet data used at
+WGMIXFISH-ADVICE. Stock variable names (`stock`) should match those of
+\code{\link[mixfishtools]{refTable}}.}
 
 \item{refTable}{data.frame A look-up reference table for stocks and associated attributes.
 The \code{refTable} data.frame lists stock names and

@@ -3,9 +3,10 @@
 #' @description Bar chart of landings by stock and by metier/gear groupings.
 #' Used in WGMIXFISH-ADVICE
 #'
-#' @param data data.frame Contains information on the landings (or catch) by stock
-#' and metiers/gear grouping from the fleet data used at WGMIXFISH-ADVICE. Stock
-#' variable names (`stock`) should match those of \code{\link[mixfishtools]{refTable}}.
+#' @param data data.frame Contains information on the landings (or catch) in
+#'   tonnes by stock and metier/gear grouping from the fleet data used at
+#'   WGMIXFISH-ADVICE. Stock variable names (`stock`) should match those of
+#'   \code{\link[mixfishtools]{refTable}}.
 #'
 #' @param refTable data.frame A look-up reference table for stocks and associated attributes.
 #' The \code{refTable} data.frame lists stock names and
@@ -97,23 +98,22 @@ plot_landByMetStock <- function(data, refTable, xlab = "",
 
   data$stock <- factor(data$stock, levels = tmp$stock) # orders the stocks
 
-
-  # y_label <- paste0(unique(dat2$Category), " ('000 tonnes)")
   none <- element_blank()
 
   p <- ggplot(data,aes(x = metier, y = value/1000, fill=stock)) +
     geom_bar(stat="identity", position = "stack") +
     theme(panel.grid.major = none, panel.grid.minor = none) +
     theme(panel.background = none) +
-    theme(panel.border = none) + theme(axis.line = element_line(colour = "grey50")) +
+    theme(panel.border = none) +
+    theme(axis.line = element_line(colour = "grey50")) +
     theme_bw() +
     labs(x = xlab, y = ylab, fill = fillLegendTitle)  +
-    theme(axis.text.x = element_text(angle = 45,size = 8,vjust=1,hjust=1))  +
-    theme(legend.text=element_text(face="bold",size=8),
-          legend.title=element_text(face="bold",size=8)) +
-    theme(axis.text = element_text(lineheight=0.8, size=8,face="bold")) +
-    theme(axis.title = element_text(size=12,face="bold")) +
-    geom_bar(stat="identity",position = "stack",colour="black") +
+    theme(axis.text.x = element_text(angle = 45, size = 8, vjust=1, hjust=1))  +
+    theme(legend.text=element_text(size=8),
+          legend.title=element_text(size=8)) +
+    theme(axis.text = element_text(lineheight=0.8, size=8)) +
+    theme(axis.title = element_text(size=10)) +
+    geom_bar(stat="identity", position = "stack", colour="black") +
     stkColorScale
 
   return(p)
