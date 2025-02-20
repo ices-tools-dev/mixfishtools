@@ -1,0 +1,139 @@
+---
+title: "Reproducing the advice: WGMIXFISH quality control procedure"
+header-includes:
+- \usepackage{pdflscape}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
+- \usepackage[singlelinecheck=false]{caption}
+output:
+  # rmarkdown::html_vignette:
+
+  html_document:
+    df_print: paged
+
+  # rmarkdown::pdf_document:
+  #   fig_caption: yes
+  #   number_sections: true
+  #   df_print: kable
+  #   toc: true
+  #   toc_depth: 3
+  #   keep_tex: yes
+vignette: >
+  %\VignetteIndexEntry{WGMIXFISH best practices}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: refs.bib
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  cache = FALSE, # TRUE for speed. Remember to empty cache after changes to cached R code sections
+  cache.path = "cache/", fig.path = "tex/",
+  echo = TRUE, 
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6, fig.height = 5, dpi=300, 
+  out.width="600px", out.height="500px"
+)
+```
+
+# Introduction
+
+Short-term forecast (STF) with deterministic model
+Quality control
+
+## Required packages to reproduce tutorial
+
+Depending on your model 
+
+```{r packages, message=FALSE, warning=FALSE}
+library(FLCore)
+library(FLasher)
+library(stockassessment)
+library(mixfishtools)
+library(FLfse)
+```
+
+bla bla
+
+
+Forecast
+
+```{r}
+data("pokSAM")
+Flast <- 0.3204268
+Fmsy <- 0.316
+TAC_assess_year <- 73815
+
+ARGS <- list(
+  fscale = c(NA, NA, NA, NA),
+  fval = c(Flast, NA, Fmsy, Fmsy),
+  catchval = c(NA, TAC_assess_year, NA, NA),
+  fit = pokSAM, ave.years = 2021:2023, rec.years = 2014:2023, 
+  nosim = 101,
+  label = "TAC (2024), then Fmsy", overwriteSelYears = 2021:2023,
+  splitLD = TRUE, savesim = TRUE)
+
+fc <- do.call(stockassessment::forecast, ARGS)
+```
+
+
+Only catch values are also estimated
+
+```{r message=FALSE, warning=FALSE}
+stk <- FLfse::SAM2FLStock(pokSAM)
+
+# in this example, only catches are estimated, but there are SAM models
+# with estimated maturity ogives, individual stock and catch weights, and 
+# natural mortality
+stkEst <- FLfse::SAM2FLStock(pokSAM, 
+  catch_estimate = T, mat_est = T, 
+  stock.wt_est = T, catch.wt_est = T, m_est = T)
+
+L <- FLStocks(list(obs = stk, est = stkEst))
+plot(L) + aes(linetype = stock) + theme_bw()
+
+
+```
+
+
+```{r}
+stkProj <- stf(object = stkEst, nyears = 3, wts.nyears=3, 
+  fbar.nyears = 3, f.rescale = TRUE, disc.nyears = 3)
+
+range(stkProj)
+
+ctrl1 <- fwdControl( 
+  data.frame(
+    year = c(2024, 2025, 2026),
+    value = c(1, Fmsy, Fmsy),
+    quant = c("f"),
+    relYear = c(2023, NA, NA)                               
+  )
+)
+
+ctrl2 <- fwdControl( 
+  data.frame(
+    year = c(2024, 2025, 2026),
+    value = c(1.5*TAC_assess_year, Fmsy, Fmsy),
+    quant = c("catch", "f", "f")                            
+  )
+)
+
+yrs <- unique(ctrl1@target[,"year"])
+srPar <- FLPar(c(94047, 94047, 94047), dimnames = list(params="a", year = yrs, iter = 1))
+
+stkProj1 <- fwd(object = stkProj, control = ctrl1, 
+  sr = list(model = "geomean", params = srPar))
+
+stkProj2 <- fwd(object = stkProj, control = ctrl2, 
+  sr = list(model = "geomean", params = srPar))
+
+L <- FLStocks(list(est = stkEst, proj_intYr_Fsq = stkProj1, proj_intYr_TAC = stkProj2))
+plot(L) + aes(linetype = stock) + 
+  geom_point() +
+  theme_bw() + coord_cartesian(xlim = c(2022, 2026))
+
+```
+
+

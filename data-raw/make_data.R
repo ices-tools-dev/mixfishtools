@@ -138,3 +138,42 @@ agg <- agg[,c("stock", "metier_cat", "landings")]
 names(agg) <- c("stock", "metier","value")
 agg
 
+
+
+
+# wgnsskStocks - FLStock objects from WGNSSK ----------------------------------------------------------------
+
+library(FLCore)
+library(ggplotFL)
+
+stkNames <- list("HAD", "NEP6", "PLE-EC", "PLE-NS", "POK", "WIT")
+res <- lapply(stkNames, FUN = function(x){
+  tmp <- load(file = file.path("data-raw", paste0(x, ".RData")), verbose = TRUE)
+  stock <- get(tmp)
+  return(stock)
+})
+names(res) <- stkNames
+
+wgnsskStocks <- FLStocks(res)
+plot(wgnsskStocks)
+
+save(wgnsskStocks, file = "data/wgnsskStocks.rda", compress = "xz")
+
+
+
+# haddockWts - haddock forecast weights ------------------------------------------------
+cwt <- read.table("data-raw/had.27.46a20 - Forecast weights - catch-at-age.txt")
+lwt <- read.table("data-raw/had.27.46a20 - Forecast weights - landings-at-age.txt")
+dwt <- read.table("data-raw/had.27.46a20 - Forecast weights - discards-at-age incl BMS and IBC.txt")
+swt <- read.table("data-raw/had.27.46a20 - Forecast weights - stock-at-age.txt")
+
+haddockWts <- list(
+  catch = cwt,
+  landings = lwt,
+  discards = dwt,
+  stock = swt
+)
+
+save(haddockWts, file = "data/haddockWts.rda", compress = "xz")
+
+
