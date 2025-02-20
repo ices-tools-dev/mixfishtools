@@ -37,30 +37,128 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Introduction
-
-Short-term forecast (STF) with deterministic model
-Quality control
-
-## Required packages to reproduce tutorial
-
-Depending on your model 
+# Required packages to reproduce tutorial
 
 ```{r packages, message=FALSE, warning=FALSE}
 library(FLCore)
 library(FLasher)
-library(stockassessment)
 library(mixfishtools)
-library(FLfse)
+library(tidyr)
+library(knitr)
 ```
 
-bla bla
+# Introduction
+
+- Short-term forecast (STF) with deterministic model
+- Quality control
 
 
-Forecast
 
-```{r}
-data("pokSAM")
+# Deterministic forecast with FLR
+
+*Procedure*:
+
+- Start with `FLStock` object with all assessment-estimated values in historical years
+- Extend FLStock into the short-term forecast years using `FLasher::stf`
+- Manually adjust forecast year assumptions to match assessment as closely as possible
+- Create `FLasher::fwdControl` object to define the targets and limits of the short-term forecast years
+- Run deterministic forecast with `FLasher::fwd`
+- Compare resulting stock parameters with those reported by the assessment 
+
+
+`FLasher::stf` contains several default arguments for defining the number of historical (i.e. terminal) years to average for future values (e.g. mean weights, )
+
+```{r stfPOK}
+data("wgnsskStocks")
+
+stkEst <- wgnsskStocks[["POK"]]
+# range(stkEst)
+
+yrAssess <- 2023 # final year of assessment data
+yrNow <- 2024 # Intermediate year
+yrTAC <- 2025 # advice year
+yrTACp1 <- 2026 # advice year plus 1 (needed to get SSB at end of yrTAC)
+
+stkProj <- stf(object = stkEst, nyears = 3, wts.nyears=3, 
+  fbar.nyears = 3, f.rescale = TRUE, disc.nyears = 3)
+# range(stkProj)
+
+Fmsy <- 0.316
+ctrl <- fwdControl( 
+  data.frame(
+    year = c(yrNow, yrTAC, yrTACp1),
+    value = c(1, Fmsy, Fmsy),
+    quant = c("f"),
+    relYear = c(yrAssess, NA, NA)                               
+  )
+)
+
+
+yrs <- unique(ctrl@target[,"year"])
+srPar <- FLPar(c(94047, 94047, 94047), dimnames = list(params="a", year = yrs, iter = 1))
+
+stkProj <- fwd(object = stkProj, control = ctrl, 
+  sr = list(model = "geomean", params = srPar))
+
+L <- FLStocks(list(est = stkEst, proj = stkProj))
+plot(L) + aes(linetype = stock) + 
+  theme_bw()
+
+```
+
+```{r comparePOK}
+# Reported output from single stock headline advice
+stfRef <- data.frame(
+  model = "NSSK",
+  year = 2023:2026,
+  catch = c(65865, 78251, 79071, NA),
+  landings = c(62691, 74968, 75880, NA),
+  fbar = c(0.32, 0.32, 0.316, NA),
+  ssb = c(161756, 185632, 195899, 197298)
+)
+
+stfDet <- data.frame(
+  model = "FLR",
+  year = c(yrNow, yrTAC, yrTACp1),
+  catch = c(catch(stkProj[,ac(c(yrNow, yrTAC, yrTACp1))])),
+  landings = c(landings(stkProj[,ac(c(yrNow, yrTAC, yrTACp1))])),
+  fbar = c(fbar(stkProj[,ac(c(yrNow, yrTAC, yrTACp1))])),
+  ssb = c(ssb(stkProj[,ac(c(yrNow, yrTAC, yrTACp1))]))
+)  
+
+df <- merge(stfRef, stfDet, all = T)
+df <- pivot_longer(df, cols = c(catch, landings, fbar, ssb), 
+  names_to = "variable", values_to = "value")
+df <- df |> 
+  filter(
+    (variable %in% c("catch", "landings", "fbar") & year %in% c(yrNow, yrTAC)) |
+    (variable %in% c("ssb") & year %in% c(yrNow, yrTAC, yrTACp1)))
+    
+
+df2 <- pivot_wider(df, names_from = model, values_from = value)
+df2$percErr <- round((df2$FLR - df2$NSSK)/df2$NSSK * 100, 1)
+
+ggplot(df) + aes(x = factor(year), y = value, color = model, shape = model) +
+  facet_wrap(~variable, scales = "free_y") +
+  geom_point(size = 3, stroke = 1) +
+  scale_shape_discrete(solid = F)
+
+
+kable(df2, digits = 3)
+```
+
+
+WGMIXISH typically uses a threshold of +/-10%.
+
+# Additional information
+
+## SAM 
+
+For users of SAM, the  `FLfse::SAM2FLStock` function can be used to produce FLStock objects from SAM assessments. By default, this function will return all model inputs as well as non-input fields (e.g. fishing mortality). In order to return all SAM estimated values (e.g. individual weights, catches, maturity, natural mortality), you must specify this with additional arguments (e.g. `SAM2FLStock(object, catch_estimate = T, mat_est = T, stock.wt_est = T, catch.wt_est = T, m_est = T)`)
+
+
+```{r samForecast, eval=FALSE, include=FALSE}
+
 Flast <- 0.3204268
 Fmsy <- 0.316
 TAC_assess_year <- 73815
@@ -76,64 +174,4 @@ ARGS <- list(
 
 fc <- do.call(stockassessment::forecast, ARGS)
 ```
-
-
-Only catch values are also estimated
-
-```{r message=FALSE, warning=FALSE}
-stk <- FLfse::SAM2FLStock(pokSAM)
-
-# in this example, only catches are estimated, but there are SAM models
-# with estimated maturity ogives, individual stock and catch weights, and 
-# natural mortality
-stkEst <- FLfse::SAM2FLStock(pokSAM, 
-  catch_estimate = T, mat_est = T, 
-  stock.wt_est = T, catch.wt_est = T, m_est = T)
-
-L <- FLStocks(list(obs = stk, est = stkEst))
-plot(L) + aes(linetype = stock) + theme_bw()
-
-
-```
-
-
-```{r}
-stkProj <- stf(object = stkEst, nyears = 3, wts.nyears=3, 
-  fbar.nyears = 3, f.rescale = TRUE, disc.nyears = 3)
-
-range(stkProj)
-
-ctrl1 <- fwdControl( 
-  data.frame(
-    year = c(2024, 2025, 2026),
-    value = c(1, Fmsy, Fmsy),
-    quant = c("f"),
-    relYear = c(2023, NA, NA)                               
-  )
-)
-
-ctrl2 <- fwdControl( 
-  data.frame(
-    year = c(2024, 2025, 2026),
-    value = c(1.5*TAC_assess_year, Fmsy, Fmsy),
-    quant = c("catch", "f", "f")                            
-  )
-)
-
-yrs <- unique(ctrl1@target[,"year"])
-srPar <- FLPar(c(94047, 94047, 94047), dimnames = list(params="a", year = yrs, iter = 1))
-
-stkProj1 <- fwd(object = stkProj, control = ctrl1, 
-  sr = list(model = "geomean", params = srPar))
-
-stkProj2 <- fwd(object = stkProj, control = ctrl2, 
-  sr = list(model = "geomean", params = srPar))
-
-L <- FLStocks(list(est = stkEst, proj_intYr_Fsq = stkProj1, proj_intYr_TAC = stkProj2))
-plot(L) + aes(linetype = stock) + 
-  geom_point() +
-  theme_bw() + coord_cartesian(xlim = c(2022, 2026))
-
-```
-
 
