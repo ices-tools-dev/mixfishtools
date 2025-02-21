@@ -146,7 +146,7 @@ agg
 library(FLCore)
 library(ggplotFL)
 
-stkNames <- list("HAD", "NEP6", "PLE-EC", "PLE-NS", "POK", "WIT")
+stkNames <- list("HAD", "NEP6", "PLE-EC", "PLE-NS", "POK", "POK_input", "WIT")
 res <- lapply(stkNames, FUN = function(x){
   tmp <- load(file = file.path("data-raw", paste0(x, ".RData")), verbose = TRUE)
   stock <- get(tmp)
