@@ -173,9 +173,9 @@ stfDet <- data.frame(
   model = "FLR",
   year = ac(yrAssess:yrTACp1),
   catch = c(catch(stkProj[,ac(yrAssess:yrTACp1)])),
-  landings = c(landings(stkProj[,ac(ac(yrAssess:yrTACp1))])),
-  fbar = c(fbar(stkProj[,ac(ac(yrAssess:yrTACp1))])),
-  ssb = c(ssb(stkProj[,ac(ac(yrAssess:yrTACp1))]))
+  landings = c(landings(stkProj[,ac(yrAssess:yrTACp1)])),
+  fbar = c(fbar(stkProj[,ac(yrAssess:yrTACp1)])),
+  ssb = c(ssb(stkProj[,ac(yrAssess:yrTACp1)]))
 )  
 
 df <- merge(stfRef, stfDet, all = T)
@@ -215,7 +215,7 @@ WGMIXISH typically uses a threshold of +/-10%.
 
 An example with haddock (had.27.46a20), where additional input for forecast slots was required ...
 
-First, is a forecast withough considering adjustments...
+First, is a forecast without considering adjustments...
 
 ```{r haddockInit}
 # load haddock
@@ -251,9 +251,7 @@ stkProj1 <- fwd(object = stkProj, control = ctrl, sr = srMod)
 # plot
 L <- FLStocks(list(assessment = stkEst, forecast = stkProj1[,ac(yrAssess:yrTACp1)]))
 plot(L) + 
-  # aes(linetype = stock) +
   scale_color_manual(values = c(8,1)) + 
-  # scale_linetype_manual(values = c(2,1)) +
   theme_bw()
 
 
@@ -271,9 +269,9 @@ stfDet1 <- data.frame(
   model = "FLR",
   year = ac(yrAssess:yrTACp1),
   catch = c(catch(stkProj1[,ac(yrAssess:yrTACp1)])),
-  landings = c(landings(stkProj1[,ac(ac(yrAssess:yrTACp1))])),
-  fbar = c(fbar(stkProj1[,ac(ac(yrAssess:yrTACp1))])),
-  ssb = c(ssb(stkProj1[,ac(ac(yrAssess:yrTACp1))]))
+  landings = c(landings(stkProj1[,ac(yrAssess:yrTACp1)])),
+  fbar = c(fbar(stkProj1[,ac(yrAssess:yrTACp1)])),
+  ssb = c(ssb(stkProj1[,ac(yrAssess:yrTACp1)]))
 )  
 
 df1 <- merge(stfRef, stfDet1, all = T)
@@ -288,14 +286,14 @@ df1$percErr <- round((df1$FLR - df1$NSSK)/df1$NSSK * 100, 1)
 
 ggplot(df1) + aes(x = year, y = percErr) + 
   facet_wrap(~variable) +
-  geom_col() +
+  geom_col(fill = 4) +
   geom_hline(yintercept = 0, linetype = 1) +
   geom_hline(yintercept = c(-10,10), linetype = 3) + 
   theme_bw()
 
 ```
 
-Then compare to a forecast with furthe adjustments....
+Then compare to a forecast with further adjustments to individual weights....
 
 ```{r haddockFix}
 stkProj2 <- stkProj
@@ -313,9 +311,9 @@ stfDet2 <- data.frame(
   model = "FLR",
   year = ac(yrAssess:yrTACp1),
   catch = c(catch(stkProj2[,ac(yrAssess:yrTACp1)])),
-  landings = c(landings(stkProj2[,ac(ac(yrAssess:yrTACp1))])),
-  fbar = c(fbar(stkProj2[,ac(ac(yrAssess:yrTACp1))])),
-  ssb = c(ssb(stkProj2[,ac(ac(yrAssess:yrTACp1))]))
+  landings = c(landings(stkProj2[,ac(yrAssess:yrTACp1)])),
+  fbar = c(fbar(stkProj2[,ac(yrAssess:yrTACp1)])),
+  ssb = c(ssb(stkProj2[,ac(yrAssess:yrTACp1)]))
 )
 
 df2 <- merge(stfRef, stfDet2, all = T)
@@ -336,7 +334,8 @@ df$stf <- factor(df$stf, levels = c("original", "adjusted"))
 
 ggplot(df) + aes(x = year, y = percErr, fill = stf) + 
   facet_wrap(~variable) +
-  geom_col(position = position_dodge()) +
+  geom_col(position = position_dodge(), width = 0.75) +
+  scale_fill_manual(values = c(4,5)) + 
   geom_hline(yintercept = 0, linetype = 1) +
   geom_hline(yintercept = c(-10,10), linetype = 3) + 
   theme_bw()
@@ -344,7 +343,7 @@ ggplot(df) + aes(x = year, y = percErr, fill = stf) +
 ```
 
 
-# A Nephrops example
+# Special case: Nephrops advice based on fixed dynamics and harvest rate
 
 Nephrops stocks are generally treated as a fixed dynamic stock, except in a few rare cases where surplus production models have been fit (e.g. FU 32). Some Nephrops FUs also contain a biomass estimates via a underwater TV-survey, while others don't. 
 
@@ -356,10 +355,10 @@ Several functions exist to calculate total weight based on the product of number
 
 The `FLasher::fwd` function does not currently handle harvest rates, and thus quality control tests for the advice year in calculated manually. Total removals are calculated based on the advised harvest rate multiplied by the stock size (`catch.n = stock.n * hr`).  
 
-The following example for nep.fu.6 shows a few tests that ensure the quality control of the FLStock. A TV-survey estimate is used to provide the assumed stock size in the advice year. The discards slot required adjustment to reflect dead discards only. Total discards were replaced and, using the mean discard weight, the discard numbers were re-calculated. The resulting comparison showed only minor difference to the reported values of the advise sheet - possibly due to rounding. 
+The following example for nep.fu.6 shows a few tests that ensure the quality control of the FLStock. A TV-survey estimate is used to provide the assumed stock size in the advice year. The discards slot required adjustment to reflect dead discards only. The resulting comparison showed only minor differences - possibly due to rounded values in the advice document. 
 
 
-```{r}
+```{r nephropsEx}
 stkEst <- wgnsskStocks[["NEP6"]]
 stkEst <- window(stkEst, start = 2001) # trim data, as earlier years only contain landings
 stkEst@landings <- computeLandings(stkEst)
@@ -406,18 +405,18 @@ hr <- ifelse(stockN < Btrigger, Fmsy * (stockN/Btrigger), Fmsy) # hcr-based hr
 # input stock size in advice year(s)
 stkProj@stock.n[,ac(yrNow:yrTACp1)] <- 760
 
-# compute total removals catch.n, landings, dead discards, and harvest rate
+# compute total removals (catch.n), followed by splits into landings.n and 
+# discards.n. 
+# then, compute total catch, landings, discards and harvest rate
 stkProj@catch.n[,ac(yrNow:yrTACp1)] <- stkProj@stock.n[,ac(yrNow:yrTACp1)] * hr
+stkProj@landings.n[,ac(yrNow:yrTACp1)] <- stkProj@catch.n[,ac(yrNow:yrTACp1)] * 
+  stkProj@landings.n[,ac(yrNow:yrTACp1)]
+stkProj@discards.n[,ac(yrNow:yrTACp1)] <- stkProj@catch.n[,ac(yrNow:yrTACp1)] * 
+  stkProj@discards.n[,ac(yrNow:yrTACp1)]
+
 stkProj@catch <- computeCatch(stkProj)
-
-stkProj@landings.n[,ac(yrNow:yrTACp1)] <- 
-  stkProj@landings.n[,ac(yrNow:yrTACp1)] * stkProj@catch.n[,ac(yrNow:yrTACp1)]
 stkProj@landings <- computeLandings(stkProj)
-
-stkProj@discards.n[,ac(yrNow:yrTACp1)] <- 
-  stkProj@discards.n[,ac(yrNow:yrTACp1)] * stkProj@catch.n[,ac(yrNow:yrTACp1)]
 stkProj@discards <- computeDiscards(stkProj)
-
 stkProj@harvest <- computeHarvest(stkProj)
 
 # compare output to reference
@@ -434,9 +433,9 @@ stfDet <- data.frame(
   model = "FLR",
   year = ac(yrTAC),
   catch = c(catch(stkProj[,ac(yrTAC)])),
-  landings = c(landings(stkProj[,ac(ac(yrTAC))])),
-  discards = c(discards(stkProj[,ac(ac(yrTAC))])),
-  fbar = c(fbar(stkProj[,ac(ac(yrTAC))]))
+  landings = c(landings(stkProj[,ac(yrTAC)])),
+  discards = c(discards(stkProj[,ac(yrTAC)])),
+  fbar = c(fbar(stkProj[,ac(yrTAC)]))
 )
 
 df <- merge(stfRef, stfDet, all = T)
@@ -447,7 +446,7 @@ df$percErr <- round((df$FLR - df$NSSK)/df$NSSK * 100, 1)
 
 ggplot(df) + aes(x = year, y = percErr) + 
   facet_wrap(~variable) +
-  geom_col() +
+  geom_col(fill = 4) +
   geom_hline(yintercept = 0, linetype = 1) +
   geom_hline(yintercept = c(-10,10), linetype = 3) + 
   theme_bw()
