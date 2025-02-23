@@ -344,7 +344,116 @@ ggplot(df) + aes(x = year, y = percErr, fill = stf) +
 ```
 
 
-# A Nephrops example (to come)
+# A Nephrops example
+
+Nephrops stocks are generally treated as a fixed dynamic stock, except in a few rare cases where surplus production models have been fit (e.g. FU 32). Some Nephrops FUs also contain a biomass estimates via a underwater TV-survey, while others don't. 
+
+WGMIXFISH includes all Nephrops FUs in mixed fishery scenarios, and thus requires an FLStock. Simply translating the Nephrops assessment into an FLStock provides a good quality control check for the accounting done during the assessment. 
+
+In cases where fixed dynamics are assumed and biomass estimates are available, harvest rates (hr, in percent) can be used in place of fishing mortality (F). This is specified in the `@harvest` slot through the units (`units(harvest(stkEst)) <- "hr"`). A short-term forecast can test whether an advised harvest rate results in the same TAC as reported. As advised harvest rates are based on dead removals (landings + dead discards), particular care should be given to only include dead discards in the `discards.n` slot.
+
+Several functions exist to calculate total weight based on the product of numbers and individual weights (`computeCatch`, `computeLandings`, `computeDiscards`), providing a further test of input data. Harvest rates can also be recalculated using `computeHarvest`. 
+
+The `FLasher::fwd` function does not currently handle harvest rates, and thus quality control tests for the advice year in calculated manually. Total removals are calculated based on the advised harvest rate multiplied by the stock size (`catch.n = stock.n * hr`).  
+
+The following example for nep.fu.6 shows a few tests that ensure the quality control of the FLStock. A TV-survey estimate is used to provide the assumed stock size in the advice year. The discards slot required adjustment to reflect dead discards only. Total discards were replaced and, using the mean discard weight, the discard numbers were re-calculated. The resulting comparison showed only minor difference to the reported values of the advise sheet - possibly due to rounding. 
+
+
+```{r}
+stkEst <- wgnsskStocks[["NEP6"]]
+stkEst <- window(stkEst, start = 2001) # trim data, as earlier years only contain landings
+stkEst@landings <- computeLandings(stkEst)
+
+# replace discards totals with dead discards only
+stkEst@discards[,ac(2001:2023)] <- c(2034, 676, 608, 523, 608, 893, 367, 141, 
+  392, 171, 209, 293, 383, 169, 162, 231, 170, 166, 385, 264, 356, 289, 281)
+stkEst@discards.n <- stkEst@discards / stkEst@discards.wt
+
+# re-compute catch
+stkEst@catch.n <- stkEst@landings.n + stkEst@discards.n
+stkEst@catch <- stkEst@landings + stkEst@discards
+stkEst@catch.wt[] <- stkEst@catch / stkEst@catch.n
+
+# re-compute harvest rate (hr)
+stkEst@harvest <- computeHarvest(stkEst)
+
+# double-check dead discard rate
+# stkEst@discards.n / stkEst@catch.n
+
+# for clarity, units can be redefined
+units(stkEst)[c("catch", "landings", "discards")] <- "tonnes"
+units(stkEst)[c("catch.n", "landings.n", "discards.n")] <- "millions"
+units(stkEst)[c("catch.wt", "landings.wt", "discards.wt")] <- "g"
+
+# extend FLStock
+stkProj <- stf(object = stkEst, nyears = 3, wts.nyears = 3, 
+  fbar.nyears = 3, f.rescale = TRUE, disc.nyears = 3)
+
+# view mean weights
+# stkProj@landings.wt[,ac(yrNow:yrTACp1)] # correct
+# stkProj@discards.wt[,ac(yrNow:yrTACp1)] # correct
+
+# view dead discard rates (forecast years are a placeholder; ratio of catch)
+# stkProj@discards.n[,ac(yrNow:yrTACp1)] # discard rate in forecast years
+# stkProj@landings.n[,ac(yrNow:yrTACp1)] # landings rate (1 - discard rate)
+
+# add assumed stock size in forecast years
+stockN <- 760  # stock size (million inds)
+Fmsy <- 0.0812 # Fmsy harvest rate
+Btrigger <- 858 # Trigger stock size
+hr <- ifelse(stockN < Btrigger, Fmsy * (stockN/Btrigger), Fmsy) # hcr-based hr
+
+# input stock size in advice year(s)
+stkProj@stock.n[,ac(yrNow:yrTACp1)] <- 760
+
+# compute total removals catch.n, landings, dead discards, and harvest rate
+stkProj@catch.n[,ac(yrNow:yrTACp1)] <- stkProj@stock.n[,ac(yrNow:yrTACp1)] * hr
+stkProj@catch <- computeCatch(stkProj)
+
+stkProj@landings.n[,ac(yrNow:yrTACp1)] <- 
+  stkProj@landings.n[,ac(yrNow:yrTACp1)] * stkProj@catch.n[,ac(yrNow:yrTACp1)]
+stkProj@landings <- computeLandings(stkProj)
+
+stkProj@discards.n[,ac(yrNow:yrTACp1)] <- 
+  stkProj@discards.n[,ac(yrNow:yrTACp1)] * stkProj@catch.n[,ac(yrNow:yrTACp1)]
+stkProj@discards <- computeDiscards(stkProj)
+
+stkProj@harvest <- computeHarvest(stkProj)
+
+# compare output to reference
+stfRef <- data.frame(
+  model = "NSSK",
+  year = ac(yrTAC),
+  catch = c(1204),
+  landings = c(1056),
+  discards = c(148),
+  fbar = c(0.072)
+)
+
+stfDet <- data.frame(
+  model = "FLR",
+  year = ac(yrTAC),
+  catch = c(catch(stkProj[,ac(yrTAC)])),
+  landings = c(landings(stkProj[,ac(ac(yrTAC))])),
+  discards = c(discards(stkProj[,ac(ac(yrTAC))])),
+  fbar = c(fbar(stkProj[,ac(ac(yrTAC))]))
+)
+
+df <- merge(stfRef, stfDet, all = T)
+df <- pivot_longer(df, cols = c(catch, landings, discards, fbar), 
+  names_to = "variable", values_to = "value")
+df <- pivot_wider(df, names_from = model, values_from = value)
+df$percErr <- round((df$FLR - df$NSSK)/df$NSSK * 100, 1)
+
+ggplot(df) + aes(x = year, y = percErr) + 
+  facet_wrap(~variable) +
+  geom_col() +
+  geom_hline(yintercept = 0, linetype = 1) +
+  geom_hline(yintercept = c(-10,10), linetype = 3) + 
+  theme_bw()
+
+```
+
 
 
 # Additional information
