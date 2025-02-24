@@ -233,8 +233,14 @@ ggplot(df) + aes(x = year, y = value, group = model, color = model, shape = mode
   coord_cartesian(ylim = c(0, NA)) +
   theme_bw()
 
-
 kable(df2, digits = 3)
+
+ggplot(df2) + aes(x = year, y = percErr) + 
+  facet_wrap(~variable) +
+  geom_col(fill = 4) +
+  geom_hline(yintercept = 0, linetype = 1) +
+  geom_hline(yintercept = c(-10,10), linetype = 3) + 
+  theme_bw()
 ```
 
 
