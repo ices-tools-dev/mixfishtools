@@ -48,13 +48,24 @@ library(FLCore)
 library(FLasher)
 library(mixfishtools)
 library(tidyr)
+library(ggplot2)
+library(ggplotFL)
 library(knitr)
 ```
 
 # Introduction
 
-- Short-term forecast (STF) with deterministic model
-- Quality control
+Reproducing the single stock advice (SSA) is a quality control step done by each WGMIXFISH case study before proceeding with mixed fishery modelling scenarios. Mixed fishery modelling is conducted with a different operating model than the SSA (e.g. FCube and FLBEIA), which is deterministic, and thus will deviate from the stochastic forecasts used by many assessment forecasts. 
+
+Currently, assessors are asked to provide assessment summaries in the form of FLStock objects. These provide a starting point for mixed fishery forecasts, but we also use them in a preliminary step to see if we are able to approximate the SSA using a deterministic forecast in FLR. In order to do this, we try and reproduce the headline advice assumptions in forecast years. This includes assumptions used for the intermediate year (e.g. status quo F, TAC uptake) and advice year fishing targets (e.g. Fmsy). Additionally, assumptions for future biological parameters must also be considered (e.g. mean weights, maturity, recruitment).
+
+During this process, we hope to identify and understand any deviations from SSA that might exist. In the past, deviations have been attributable to both simple reporting errors, as well as inconsistencies between specified assumptions and those of the forecast.
+
+The aim of this document is to demonstrate the procedure employed by WGMIXFISH so that assessors can help catch issues at an earlier stage in the advice calendar year, potentially reducing the frequency of re-openings. 
+
+In the past, assessors have been asked to deliver two FLStock objects to WGMIXFISH: 1. containing input data, and 2. containing all assessment estimated data. To improve consistency between SSA and WGMIXFISH forecasts, we would now ask that the FLStock containing estimated data also include the forecast years. This will ensure even greater consistency in the mixed fishery forecasts regarding biological parameter assumptions and allow for further quality control checks. 
+
+The following section outlines the basic procedure in setting up an FLR-based deterministic forecast. After that, an additional section highlights typical problems encountered, as relating to misspecified forecast assumptions. Finally, a specialized approach is presented for Nephrops, whose advice is based on harvest rates and fixed stock dynamics.
 
 
 # The procedure
@@ -342,6 +353,8 @@ ggplot(df) + aes(x = year, y = percErr, fill = stf) +
 
 ```
 
+Residual differences are likely attributable to the use of the intermediate year IBTS survey index in the forecast, which influences the starting numbers in 2024. This information is not currently used in the FLR forecast as well as the mixed fishery model. 
+
 
 # Special case: Nephrops advice based on fixed dynamics and harvest rate
 
@@ -403,7 +416,7 @@ Btrigger <- 858 # Trigger stock size
 hr <- ifelse(stockN < Btrigger, Fmsy * (stockN/Btrigger), Fmsy) # hcr-based hr
 
 # input stock size in advice year(s)
-stkProj@stock.n[,ac(yrNow:yrTACp1)] <- 760
+stkProj@stock.n[,ac(yrNow:yrTACp1)] <- stockN
 
 # compute total removals (catch.n), followed by splits into landings.n and 
 # discards.n. 
@@ -480,4 +493,18 @@ ARGS <- list(
 
 fc <- do.call(stockassessment::forecast, ARGS)
 ```
+
+
+# Software Versions
+
+-   `r version$version.string`
+-   FLCore: `r packageVersion('FLCore')`
+-   FLasher: `r packageVersion('FLasher')`
+-   ggplot2: `r packageVersion('ggplot2')`
+-   ggplotFL: `r packageVersion('ggplotFL')`
+-   mixfishtools: `r packageVersion('mixfishtools')`
+-   tidyr: `r packageVersion('tidyr')`
+-   knitr: `r packageVersion('tidyr')`
+-   **Compiled**: `r format(Sys.Date(), '%Y-%b-%d')`
+
 
