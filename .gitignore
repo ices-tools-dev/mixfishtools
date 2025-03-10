@@ -47,6 +47,7 @@ vignettes/tex/
 # Other files
 *.png
 !/hexsticker/*.png
+!/data-raw/*.png
 
 inst/doc
 
