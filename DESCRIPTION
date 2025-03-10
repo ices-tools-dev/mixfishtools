@@ -1,8 +1,8 @@
 Package: mixfishtools
 Type: Package
 Title: WGMIXFISH tools for reproducibility 
-Version: 0.4.3
-Date: 2024-10-15
+Version: 0.5.0
+Date: 2025-02-20
 Author: Marc Taylor, Mikel Aristegui, Johnathan Ball, Harriet Cole, Paul Dolder
 Maintainer: Marc Taylor <marc.taylor@thuenen.de>
 Description: Contains plot templates used in WGMIXFISH-ADVICE and Fisheries 
@@ -12,15 +12,16 @@ Depends:
     ggplot2,
     ggrepel,
     ggalluvial,
-    htmlwidgets,
-    networkD3,
-    htmltools,
     dplyr
 Suggests:
+    tidyr,
     png,
     knitr,
     kableExtra,
-    rmarkdown
+    rmarkdown,
+    FLCore,
+    FLasher,
+    ggplotFL
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: false
