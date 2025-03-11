@@ -3,10 +3,8 @@
 ^README\.Rmd$
 ^LICENSE\.md$
 ^hexSticker$
-^working$
-^working/effortPlot$
-^working/hexSticker_figs$
-^data-raw
+^working/*
+^data-raw/*
 ^.png$
 
 ^vignettes/cache$
