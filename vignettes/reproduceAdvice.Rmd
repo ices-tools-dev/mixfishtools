@@ -55,32 +55,35 @@ library(knitr)
 
 # Introduction
 
-Reproducing the single stock advice (SSA) is a quality control step done by each WGMIXFISH case study before proceeding with mixed fishery modelling scenarios. Mixed fishery modelling is conducted with a different operating model than the SSA (e.g. FCube and FLBEIA), which is deterministic, and thus will deviate from the stochastic forecasts used by many assessment forecasts. 
+Reproducing the single stock advice (SSA) is a quality control step done by each WGMIXFISH case study before proceeding with mixed fishery modelling scenarios. Mixed fishery modelling is conducted with a different operating model than the SSA (e.g. FCube and FLBEIA), which is deterministic and thus will deviate from the stochastic forecasts used by many assessment forecasts.
 
-Currently, assessors are asked to provide assessment summaries in the form of FLStock objects. These provide a starting point for mixed fishery forecasts, but we also use them in a preliminary step to see if we are able to approximate the SSA using a deterministic forecast in FLR. In order to do this, we try and reproduce the headline advice assumptions in forecast years. This includes assumptions used for the intermediate year (e.g. status quo F, TAC uptake) and advice year fishing targets (e.g. Fmsy). Additionally, assumptions for future biological parameters must also be considered (e.g. mean weights, maturity, recruitment).
+Currently, assessors are asked to provide assessment summaries in the form of FLStock objects. These provide a starting point for setting up mixed fishery forecasts, but they are also use to see if we are able to approximate the SSA using a deterministic forecast in FLR. Specifically, we use information from the headline advice of each stock for forecast years. This includes assumptions used for the intermediate year (e.g. status quo F, TAC uptake) and advice year fishing targets (e.g. Fmsy). Additionally, assumptions for future biological parameters must also be considered (e.g. mean weights, maturity, recruitment).
 
-During this process, we hope to identify and understand any deviations from SSA that might exist. In the past, deviations have been attributable to both simple reporting errors, as well as inconsistencies between specified assumptions and those of the forecast.
+During this process, we hope to identify and understand any deviations from SSA that might exist. In the past, larger deviations have been attributable to both simple reporting errors as well as inconsistencies between specified assumptions and those of the forecast.
 
-The aim of this document is to demonstrate the procedure employed by WGMIXFISH so that assessors can help catch issues at an earlier stage in the advice calendar year, potentially reducing the frequency of re-openings. 
+The aim of this document is to demonstrate the procedure employed by WGMIXFISH so that assessors can help catch issues at an earlier stage in the advice calendar year, potentially reducing the frequency of re-openings.
 
-In the past, assessors have been asked to deliver two FLStock objects to WGMIXFISH: 1. containing input data, and 2. containing all assessment estimated data. To improve consistency between SSA and WGMIXFISH forecasts, we would now ask that the FLStock containing estimated data also include the forecast years. This will ensure even greater consistency in the mixed fishery forecasts regarding biological parameter assumptions and allow for further quality control checks. 
+In the past, assessors have been asked to deliver two FLStock objects to WGMIXFISH: 1. containing input data, and 2. containing all assessment estimated data. To improve consistency between SSA and WGMIXFISH forecasts, we would now ask that the FLStock containing estimated data also include the forecast years. This will ensure even greater consistency in the mixed fishery forecasts regarding biological parameter assumptions and allow for further quality control checks.
 
-The following section outlines the basic procedure in setting up an FLR-based deterministic forecast. After that, an additional section highlights typical problems encountered, as relating to misspecified forecast assumptions. Finally, a specialized approach is presented for Nephrops, whose advice is based on harvest rates and fixed stock dynamics.
-
+The following section outlines the basic procedure in setting up an FLR-based deterministic forecast. After that, an additional section highlights typical problems encountered, as relating to mis-specified forecast assumptions. Finally, a specialized approach is presented for Nephrops, whose advice is based on harvest rates and fixed stock dynamics, requiring a slightly altered methodology to forecast the stock.
 
 # The procedure
 
-1. Start with `FLStock` object with all assessment-estimated values in historical years
-2. Extend FLStock into the short-term forecast years using `FLasher::stf` and, if necessary, manually adjust forecast year slot values to match assessment as closely as possible
-3. Create `FLasher::fwdControl` object to define the targets and limits of the short-term forecast years
-4. Run deterministic forecast with `FLasher::fwd`
-5. Compare resulting stock parameters with those reported by the assessment 
+1.  Start with an `FLStock` object with all assessment-estimated values in historical years
+2.  Extend FLStock into the short-term forecast years using `FLasher::stf`, and create a and, if necessary, manually adjust forecast year slot values to match assessment as closely as possible
+3.  Create `FLasher::fwdControl` object to define the targets and limits of the short-term forecast years
+4.  Run deterministic forecast with `FLasher::fwd`
+5.  Compare resulting stock parameters with those reported by the assessment
 
-An example with saithe (pok.27.3a46)...
+To demonstrate the procedure, the following example uses the assessment oand forecast information from North Sea saithe (pok.27.3a46) as assessed in 2024.
 
 ## The FLStock with assessment summary
 
-- Contains all assessment estimated values, so that resulting forecast can be reproduced. May differ from the input data in many slots. Here only, catch has been re-estimated to allow for observation error.
+The starting `FLStock` object contains all assessment-estimated values. It is important to use estimated rather than input values in order to reproduce the forecast values as closely as possible. Similarly, mixed fisheries models scale the observed catches by fleet to sum up to the estimated values of the individual SSAs.
+
+Estimated values may differ from the input data in many variables (i.e. "slots"), such as catch and biological data in order to account for observation error. In the example case of saithe, only catch values are re-estimated by the assessment model.
+
+For illustration, the following code compares the input vs. estimated `FLStock` objects via a summary plot, showing the difference in the catches.
 
 ```{r FLStockCreation}
 data("wgnsskStocks")
@@ -99,20 +102,31 @@ plot(L) +
 
 ## Extend FLStock for short-term forecast
 
-- extend 3 years (intermediate, advice, and advice +1 years)
-- `FLasher::stf` contains several default arguments for defining the number of historical (i.e. terminal) years to average for future values (e.g. mean weights, selection pattern, discard rates). Note that the `wts.nyears` argument defines the averaging period for all biological slots (`catch.wt`, `landings.wt`, `discards.wt`, `stock.wt`, `mat`, `m`, `harvest.spwn`, `m.spwn`).
-- If needed, manually adjust slots to reflect the assumptions of the forecast.
+In preparation of the short-term forecast, we first extend the `FLStock` object by 3 years (intermediate, advice, and advice +1 years) using the `FLasher::stf` function. The function contains several default arguments for defining the number of historical (i.e. terminal) years used to average future values (e.g. mean weights, selection pattern, discard rates). Note that the `wts.nyears` argument defines the averaging period for all biological slots (`catch.wt`, `landings.wt`, `discards.wt`, `stock.wt`, `mat`, `m`, `harvest.spwn`, `m.spwn`). The discard ratio is kept within the `landings.n` and `discards.n` slots as a temporary simple ratio (by age), again determined by the historical ratios between the two slots. See `?FLasher::stf` for further arguments.
 
+Forecast year values may need to be manually adjusted to reflect the assumptions of the forecast. For example, if values are not based on a simple mean, but based on some auto-regressive model, these may need to be input manually (see *Typical problems* section below for an example of this).
+
+The following example uses a simple 3-year average for future biological and selectivity slots, and records this extended `FLStock` under a new object name (`stkProj`). The forecast values are show in black in the following figure.
+
+Finally, recruitment assumptions are defined with an `FLSR` object, which defines the type of stock-recruitment model used in the forecast. In order to best-match the SSA, we use the advice sheet reported values directly. In order to do this, we use a geometric mean model, where the parameter definition (`FLPar` object) reflects these values.
 
 ```{r FLStockExtention}
+# forecast year definitions
 yrAssess <- 2023 # final year of assessment data
 yrNow <- 2024 # intermediate year
 yrTAC <- 2025 # advice year
 yrTACp1 <- 2026 # advice year +1 (needed to get SSB at end of yrTAC)
 
+# extend FLStock object
 stkProj <- stf(object = stkEst, nyears = 3, wts.nyears = 3, 
   fbar.nyears = 3, f.rescale = TRUE, disc.nyears = 3)
 
+# stock-recruitment model (manual input within a geometric mean model)
+srPar <- FLPar(c(94047, 94047, 94047), 
+  dimnames = list(params="a", year = c(yrNow, yrTAC, yrTACp1), iter = 1))
+srMod <- FLSR(model = "geomean", params = srPar)
+
+# View the extended FLStock
 df <- as.data.frame(stkProj)
 df <- subset(df, slot %in% c("landings.wt", "discards.wt", "catch.wt", "m", "mat", "harvest") & year > (yrAssess-20))
 df$forecast <- df$year %in% c(yrNow, yrTAC, yrTACp1)
@@ -126,11 +140,11 @@ ggplot(df) + aes(x = year, y = data, group = age, color = forecast) +
 
 ```
 
+***Note:*** If a SSA includes estimated numbers at the start of the intermediate year (e.g. based on the intermediate survey indices), these numbers are not considered in the deterministic forecast. If these values are manually input into the forecast `FLStock`, they will be recalculated according to the previous year's catches (i.e. according to Baranov function) and overwritten during the deterministic forecast.
 
 ## Define forecast control
 
-- Set up `fwdControl` to define the targets and limits of the short-term forecast (years)e.g. intermediate year assumptions, target F, etc.)
-- Set up stock-recruitment model, which will simply hold the recruitment values used by the forecast. These are typically the reported geometric mean in the advice sheet. 
+The next step is to create a `fwdControl` object, which defines the targets and limits of the short-term forecast years (e.g. intermediate year assumptions, target F, etc.). In the case of a status quo effort assumption for the intermediate year, one defines the relative year to which this value is taken (e.g. the last assessment data year). See `?FLasher::fwdControl` for further examples.
 
 ```{r stfControl}
 # stf control (Fsq, followed by 2 years at Fmsy)
@@ -143,14 +157,11 @@ ctrl <- fwdControl(
     relYear = c(yrAssess, NA, NA)                               
   )
 )
-
-# stock-recruitment model (manual input within a geometric mean model)
-srPar <- FLPar(c(94047, 94047, 94047), 
-  dimnames = list(params="a", year = c(yrNow, yrTAC, yrTACp1), iter = 1))
-srMod <- FLSR(model = "geomean", params = srPar)
 ```
 
 ## Run deterministic forecast with FLasher
+
+We are now able to project the stock forward using `FLflasher::fwd`, passing the extended `FLStock`, `fwdControl`, and `FLSR` objects as arguments. The following figure shows a summary of the resulting projection, with the forecast years in black.
 
 ```{r forecast}
 # projection
@@ -165,7 +176,7 @@ plot(L) +
   theme_bw()
 ```
 
-If the intermediate assumption if a catch target, the control object can be adapted in the following way.
+If the intermediate assumption if a catch target, the `fwdControl` object can be adapted in the following way.
 
 ```{r forecastCatchTarg}
 TACNow <- 73815
@@ -190,8 +201,11 @@ kable(df, digits = 3)
 
 ```
 
-
 ## Compare summary statistics
+
+Finally, we can compare the summary of the deterministic forecast with the reported values from the SSA. The following example creates two summary `data.frame` objects, containing catch, landings, fbar, and ssb from the forecast years. The code contains a could examples for examining the differences: figure of absolute values and table and figure of percent differences by parameter and forecast year.
+
+WGMIXISH typically uses a threshold of +/-10% to accept a given stock for use in the subsequent mixed fishery model. From our experience, differences larger than this are not typical of deviations between stochastic vs deterministic forecasts, and usually indicate other issues.
 
 ```{r compare}
 # Reported output from single stock headline advice
@@ -221,7 +235,6 @@ df <- df |>
     (variable %in% c("catch", "landings", "fbar") & year <= yrTAC) |
     (variable %in% c("ssb") & year <= yrTACp1))
     
-
 df2 <- pivot_wider(df, names_from = model, values_from = value)
 df2$percErr <- round((df2$FLR - df2$NSSK)/df2$NSSK * 100, 1)
 
@@ -237,26 +250,21 @@ kable(df2, digits = 3)
 
 ggplot(df2) + aes(x = year, y = percErr) + 
   facet_wrap(~variable) +
-  geom_col(fill = 4) +
+  geom_col(fill = 4, color = 4) +
   geom_hline(yintercept = 0, linetype = 1) +
   geom_hline(yintercept = c(-10,10), linetype = 3) + 
   theme_bw()
 ```
 
-
-WGMIXISH typically uses a threshold of +/-10%.
-
-
-
-
 # Typical problems
 
-- Forecast slots need additional adjustment to be consistent with the forecast (individual weights, maturity ogive, natural mortality, etc.). State-space models may model future conditions in a more sophisticated way than a simple average of the recent past, such as time-varying processes (e.g. random walk or auto-regressive). These may need to be input manually into the forecast years of the slots. 
-- Note that while time-varying selectivity may be largely reproduced in a deterministic forecast, the inclusion of this process in the subsequent mixed fishery model is currently impossible due to the splitting of catches across fleets and métiers.
+Where deviations are larger than the +/-10% threshold, one might start investigation as to whether future slot values have been correctly defined. State-space models may model future conditions in a more sophisticated way than a simple average of the recent past, such as time-varying processes (e.g. random walk or auto-regressive), which may be used for a host of values (e.g. individual weights, maturity ogive, natural mortality, selectivity, etc.). These may need to be input manually into the forecast years of the slots.
 
-An example with haddock (had.27.46a20), where additional input for forecast slots was required ...
+Note that while time-varying selectivity may be largely reproduced in a deterministic forecast, the inclusion of this process in the subsequent mixed fishery model is currently impossible due to the splitting of catches across fleets and métiers. Nevertheless, it's inclusion in the reproduce the advice quality control procedure is encouraged to successfully identify remaining issues.
 
-First, is a forecast without considering adjustments...
+The following example comes from North Sea haddock (had.27.46a20) as assessed in 2024, where manual input of forecast values for weight-at-age slots was required.
+
+First, the procedure is conducted without these adjustments in order to illustrate the poor reproduction of advice.
 
 ```{r haddockInit}
 # load haddock
@@ -327,24 +335,26 @@ df1$percErr <- round((df1$FLR - df1$NSSK)/df1$NSSK * 100, 1)
 
 ggplot(df1) + aes(x = year, y = percErr) + 
   facet_wrap(~variable) +
-  geom_col(fill = 4) +
+  geom_col(fill = 4, color = 4) +
   geom_hline(yintercept = 0, linetype = 1) +
   geom_hline(yintercept = c(-10,10), linetype = 3) + 
   theme_bw()
 
 ```
 
-Then compare to a forecast with further adjustments to individual weights....
+Deviations above the threshold are seen for all summary parameters except F, which is matched more or less perfectly due to it's input as a controlling parameter (in `fwdControl` object).
+
+Now we adjust the weight-at-age values assumed by the SSA, and compare again.
 
 ```{r haddockFix}
 stkProj2 <- stkProj
 
 # replace individual weights
 data("haddockWts")
-catch.wt(stkProj2)[, ac(yrNow:yrTACp1)][] <- t(haddockWts$catch)
-landings.wt(stkProj2)[, ac(yrNow:yrTACp1)][] <- t(haddockWts$landings)
-discards.wt(stkProj2)[, ac(yrNow:yrTACp1)][] <- t(haddockWts$discards)
-stock.wt(stkProj2)[, ac(yrNow:yrTACp1)][] <- t(haddockWts$stock)
+catch.wt(stkProj2)[, ac(yrNow:yrTACp1)][] <- t(haddockWts$catch) # catch weight-at-age
+landings.wt(stkProj2)[, ac(yrNow:yrTACp1)][] <- t(haddockWts$landings) # landings weight-at-age
+discards.wt(stkProj2)[, ac(yrNow:yrTACp1)][] <- t(haddockWts$discards) # discards weight-at-age
+stock.wt(stkProj2)[, ac(yrNow:yrTACp1)][] <- t(haddockWts$stock) # catcstockh weight-at-age
 
 stkProj2 <- fwd(object = stkProj2, control = ctrl, sr = srMod)
 
@@ -373,33 +383,34 @@ df$stf <- "original"
 df <- rbind(df, df2)
 df$stf <- factor(df$stf, levels = c("original", "adjusted"))
 
-ggplot(df) + aes(x = year, y = percErr, fill = stf) + 
+ggplot(df) + aes(x = year, y = percErr, fill = stf, colour = stf) + 
   facet_wrap(~variable) +
   geom_col(position = position_dodge(), width = 0.75) +
   scale_fill_manual(values = c(4,5)) + 
+  scale_color_manual(values = c(4,5)) + 
   geom_hline(yintercept = 0, linetype = 1) +
   geom_hline(yintercept = c(-10,10), linetype = 3) + 
   theme_bw()
 
 ```
 
-Residual differences are likely attributable to the use of the intermediate year IBTS survey index in the forecast, which influences the starting numbers in 2024. This information is not currently used in the FLR forecast as well as the mixed fishery model. 
+Residual differences are likely attributable to the use of the intermediate year IBTS survey index in the forecast, which influences the starting numbers in 2024. This information is not currently used in the FLR forecast, nor in the the mixed fishery model.
 
+# Special case: fixed dynamics and harvest rate advice (Nephrops)
 
-# Special case: Nephrops advice based on fixed dynamics and harvest rate
+Nephrops stocks are generally treated as a fixed dynamic stock, except in a few rare cases where surplus production models have been fit (e.g. SPiCT). Some Nephrops functional units (FUs) also contain abundance estimates via an underwater TV-survey, while others rely on catch trends to provide advice.
 
-Nephrops stocks are generally treated as a fixed dynamic stock, except in a few rare cases where surplus production models have been fit (e.g. FU 32). Some Nephrops FUs also contain abundance estimates via an underwater TV-survey, while others rely on catch trends to provide advice. 
+WGMIXFISH includes all Nephrops FUs in mixed fishery scenarios, and thus requires an `FLStock` for each. Simply translating the Nephrops assessment into an `FLStock` provides a good quality control check for the accounting done during the assessment.
 
-WGMIXFISH includes all Nephrops FUs in mixed fishery scenarios, and thus requires an FLStock for each. Simply translating the Nephrops assessment into an FLStock provides a good quality control check for the accounting done during the assessment. 
+In cases where fixed dynamics are assumed and abundance estimates are available, harvest rates (*hr*, in percent) can be used in place of fishing mortality (*F*). This is specified in the `@harvest` slot through the units (`units(harvest(stkEst)) <- "hr"`). A short-term forecast can test whether an advised harvest rate results in the same TAC as reported.
 
-In cases where fixed dynamics are assumed and abundance estimates are available, harvest rates (*hr*, in percent) can be used in place of fishing mortality (*F*). This is specified in the `@harvest` slot through the units (`units(harvest(stkEst)) <- "hr"`). A short-term forecast can test whether an advised harvest rate results in the same TAC as reported. As advised harvest rates are based on dead removals (landings + dead discards), particular care should be given to only include only dead discards in the `discards.n` slot.
+As advised harvest rates for Nephrops are based on *dead removals* (landings + dead discards), particular care should be given to only include only dead discards in the `discards.n` slot.
 
-Several functions exist to calculate total weight based on the product of numbers and individual weights (`computeCatch`, `computeLandings`, `computeDiscards`), providing a further test of the assessment calculations. Harvest rates can also be recalculated using `computeHarvest`. 
+Several functions exist to calculate total weight based on the product of numbers and individual weights (`computeCatch`, `computeLandings`, `computeDiscards`), providing a further test of the assessment calculations. Harvest rates can also be recalculated using `computeHarvest`.
 
-The `FLasher::fwd` function does not currently handle harvest rates, and thus quality control tests for the advice year in calculated manually. Total removals are calculated based on the advised harvest rate multiplied by the stock size (`catch.n = stock.n * hr`).  
+The `FLasher::fwd` function does not currently handle harvest rates, and thus quality control tests for the advice year are calculated manually. Total removals are calculated based on the advised harvest rate multiplied by the stock size (`catch.n = stock.n * hr`).
 
-The following example for nep.fu.6 shows a few tests that ensure the quality control of the FLStock. A TV-survey estimate is used to provide the assumed stock size in the advice year. In this case, the discards slot required adjustment to reflect dead discards only. The resulting comparison showed good agreement with reported values, with minor differences likely due to rounded values in the advice document. 
-
+The following example for FU 6 (nep.fu.6) shows a few tests that ensure the quality control of the `FLStock`. A TV-survey estimate is used to provide the assumed stock size in the advice year. In this case, the discards slot required adjustment to reflect dead discards only. The resulting comparison showed good agreement with reported values, with minor differences likely due to rounded values in the advice document.
 
 ```{r nephropsEx}
 stkEst <- wgnsskStocks[["NEP6"]]
@@ -489,20 +500,20 @@ df$percErr <- round((df$FLR - df$NSSK)/df$NSSK * 100, 1)
 
 ggplot(df) + aes(x = year, y = percErr) + 
   facet_wrap(~variable) +
-  geom_col(fill = 4) +
+  geom_col(fill = 4, color = 4) +
   geom_hline(yintercept = 0, linetype = 1) +
   geom_hline(yintercept = c(-10,10), linetype = 3) + 
   theme_bw()
 
 ```
 
-
-
 # Additional information
 
-## SAM 
+## SAM
 
-For users of SAM, the  `FLfse::SAM2FLStock` function can be used to produce FLStock objects from SAM assessments. By default, this function will return all model inputs as well as non-input fields (e.g. fishing mortality). In order to return all SAM estimated values (e.g. individual weights, catches, maturity, natural mortality), you must specify this with additional arguments (e.g. `SAM2FLStock(object, catch_estimate = T, mat_est = T, stock.wt_est = T, catch.wt_est = T, m_est = T)`)
+[MORE TO COME ON HOW TO EXTRACT FORECAST SLOTS FROM SAM OBJECTS]
+
+For users of SAM, the `FLfse::SAM2FLStock` function can be used to produce FLStock objects from SAM assessments. By default, this function will return all model inputs as well as non-input fields (e.g. fishing mortality). In order to return all SAM estimated values (e.g. individual weights, catches, maturity, natural mortality), you must specify this with additional arguments (e.g. `SAM2FLStock(object, catch_estimate = T, mat_est = T, stock.wt_est = T, catch.wt_est = T, m_est = T)`)
 
 How to extract information from the forecast object...
 
@@ -524,7 +535,6 @@ ARGS <- list(
 fc <- do.call(stockassessment::forecast, ARGS)
 ```
 
-
 # Software Versions
 
 -   `r version$version.string`
@@ -536,5 +546,3 @@ fc <- do.call(stockassessment::forecast, ARGS)
 -   tidyr: `r packageVersion('tidyr')`
 -   knitr: `r packageVersion('tidyr')`
 -   **Compiled**: `r format(Sys.Date(), '%Y-%b-%d')`
-
-

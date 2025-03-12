@@ -2,7 +2,7 @@
 
 # mixfishtools
 
-[![:registry status badge](https://ices-tools-prod.r-universe.dev/badges/mixfishtools)](https://ices-tools-prod.r-universe.dev) 
+[![:registry status badge](https://ices-tools-prod.r-universe.dev/badges/mixfishtools)](https://ices-tools-prod.r-universe.dev)
 
 **To install:**
 
@@ -15,8 +15,15 @@ library(remotes)
 install_github(repo = "ices-tools-dev/mixfishtools")
 ```
 
-**mixfishtools vignette**
+# Vignettes
 
-An Rmarkdown tutorial can be found in 'vignettes/mixfishtoolsGuide.Rmd'
+-   ***mixfishtools guide***- Guide to use of the *mixfishtools* functions.
 
-You can build this using `devtools::build_vignettes()`, or during installation, with `remotes::install_github(repo = "ices-tools-dev/mixfishtools", build_vignettes = TRUE)`. The vignette can then be viewed in your browser, using `browseVignettes(package = "mixfishtools")`.
+-   ***Reproduce advice*** - WGMIXFISH quality control procedure to test the reproduction of single stock advice forecasts before proceeding with mixed fishery modelling scenarios.
+
+To build directly during installation: `remotes::install_github(repo = "ices-tools-dev/mixfishtools", build_vignettes = TRUE)`, 
+followed by `browseVignettes(package = "mixfishtools")` to view.
+
+Both Rmarkdown documents to produce the vignettes are found in the '/vignettes' subfolder of the repo. 
+When using the cloned repo, these can be built using `devtools::build_vignettes()`. 
+

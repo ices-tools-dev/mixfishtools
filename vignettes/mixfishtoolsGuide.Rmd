@@ -19,7 +19,7 @@ output:
   #   toc_depth: 3
   #   keep_tex: yes
 vignette: >
-  %\VignetteIndexEntry{WGMIXFISH best practices}
+  %\VignetteIndexEntry{mixfishtools guide}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: refs.bib
