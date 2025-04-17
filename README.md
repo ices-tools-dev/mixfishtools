@@ -17,11 +17,11 @@ install_github(repo = "ices-tools-dev/mixfishtools")
 
 # Vignettes
 
--   ***mixfishtools guide***- Guide to use of the *mixfishtools* functions.
+-   [***mixfishtools guide***](https://raw.githack.com/ices-tools-dev/mixfishtools/main/doc/mixfishtoolsGuide.html) - Guide to use of the *mixfishtools* functions.
 
--   ***FLStock creation*** - Guide to creating FLStock objects for use in WGMIXFISH
+-   [***FLStock creation***](https://raw.githack.com/ices-tools-dev/mixfishtools/main/doc/FLStock2WGMIXFISH.html) - Guide to creating FLStock objects for use in WGMIXFISH
 
--   ***Reproduce advice*** - WGMIXFISH quality control procedure to test the reproduction of single stock advice forecasts before proceeding with mixed fishery modelling scenarios
+-   [***Reproduce advice***](https://raw.githack.com/ices-tools-dev/mixfishtools/main/doc/reproduceAdvice.html) - WGMIXFISH quality control procedure to test the reproduction of single stock advice forecasts before proceeding with mixed fishery modelling scenarios
 
 To build directly during installation: `remotes::install_github(repo = "ices-tools-dev/mixfishtools", build_vignettes = TRUE)`, followed by `browseVignettes(package = "mixfishtools")` to view.
 
