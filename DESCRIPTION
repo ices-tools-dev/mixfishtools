@@ -21,7 +21,10 @@ Suggests:
     rmarkdown,
     FLCore,
     FLasher,
-    ggplotFL
+    ggplotFL,
+    FLfse,
+    stockassessment,
+    spict
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: false

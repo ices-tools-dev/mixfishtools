@@ -1,35 +1,4 @@
----
-title: "Guide to mixfishtools package"
-header-includes:
-- \usepackage{pdflscape}
-- \newcommand{\blandscape}{\begin{landscape}}
-- \newcommand{\elandscape}{\end{landscape}}
-- \usepackage[singlelinecheck=false]{caption}
-output:
-  # rmarkdown::html_vignette:
-  html_document:
-    number_sections: TRUE
-    df_print: paged
-    toc: true
-    toc_depth: 3
-    toc_float:
-      collapsed: true
-
-  # rmarkdown::pdf_document:
-  #   fig_caption: yes
-  #   number_sections: true
-  #   df_print: kable
-  #   toc: true
-  #   toc_depth: 3
-  #   keep_tex: yes
-vignette: >
-  %\VignetteIndexEntry{mixfishtools guide}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
-bibliography: refs.bib
----
-
-```{r setup, include = FALSE}
+## ----setup, include = FALSE---------------------------------------------------
 knitr::opts_chunk$set(
   cache = FALSE, # TRUE for speed. Remember to empty cache after changes to cached R code sections
   cache.path = "cache/", fig.path = "tex/",
@@ -39,63 +8,27 @@ knitr::opts_chunk$set(
   fig.width = 6, fig.height = 5, dpi=300, 
   out.width="600px", out.height="500px"
 )
-```
 
-# Introduction
+## ----ggplot2_adapt_ex, eval=FALSE, include=TRUE-------------------------------
+# p <- plot_effortFltStk(data, refTable)
+# p <- p + theme(text = element_text(size = 12)) # adjust font size
+# print(p)
 
-This vignette describes the use of the *mixfishtools* package, which is used by WGMIXFISH for creating plot outputs for WGMIXFISH-ADVICE, Fisheries Overviews, and other associated dissemination products. 
+## ----install, eval=FALSE, include=TRUE----------------------------------------
+# # install pre-compiled package (preferred)
+# install.packages('mixfishtools', repo = 'https://ices-tools-prod.r-universe.dev')
+# 
+# # install from source
+# library(remotes)
+# install_github(repo = "ices-tools-dev/mixfishtools")
 
-Most plotting function produce `ggplot2` outputs, which can be subsequently adapted to specific formatting needs; e.g.:
-
-```{r ggplot2_adapt_ex, eval=FALSE, include=TRUE}
-p <- plot_effortFltStk(data, refTable)
-p <- p + theme(text = element_text(size = 12)) # adjust font size
-print(p)
-```
-
-
-All examples are created from example data files included in the *mixfishtools* package (e.g. `stfFltSum`, `stfFltStkSum`, `stfMtStkSum`). For brevity, only the final prepared data structures necessary for the respective functions are shown below, but the procedures to adapt the example data to the final structures are illustrated in the respective help page examples of each function (e.g. `?plot_catchScenStk`).
-
-# Installation of *mixfishtools*
-
-In order to install the most recent version, please install the package in one of the following ways:
-
-```{r install, eval=FALSE, include=TRUE}
-# install pre-compiled package (preferred)
-install.packages('mixfishtools', repo = 'https://ices-tools-prod.r-universe.dev')
-
-# install from source
-library(remotes)
-install_github(repo = "ices-tools-dev/mixfishtools")
-```
-
-Then load the package:
-
-```{r load, message=FALSE, warning=FALSE}
+## ----load, message=FALSE, warning=FALSE---------------------------------------
 library(mixfishtools)
-```
 
-A further package to read and embed the produced .png files:
-
-```{r load_extra, message=FALSE, warning=FALSE}
+## ----load_extra, message=FALSE, warning=FALSE---------------------------------
 library(mixfishtools)
-```
 
-
-
-
-# Mixed fisheries considerations
-
-The following section outlines the main plotting functions used for the mixed fisheries considerations documents from WGMIXFISH-ADVICE.
-
-## Headline plot of catch uptake by stock and scenario
-
-In the following example, we will prepare two objects to be passed to the plotting function `plot_catchScenStk`. 
-
-The first object, `data`, is a `data.frame` containing catches by scenario and stock in the advice year. The example data `stfFltStkSum` is aggregated across fleets to produce this object, with variables named `scenario`, `stock`, and `catch`. The order of scenarios should be specified by the order of levels in the factor variable `scenario`. 
-
-
-```{r plot_catchScenStk_data_prep, include=FALSE}
+## ----plot_catchScenStk_data_prep, include=FALSE-------------------------------
 # make example data
 data(stfFltStkSum)
 data("refTable")
@@ -116,16 +49,11 @@ data$stock <- refTable$stock[match(data$stock, refTable$stock_short)]
 data$scenario <- factor(data$scenario,
   levels = c("min", "max", "sq_E", "cod-ns"),
   labels = c("min", "max", "sq_E", "cod-ns"))
-```
 
-```{r plot_catchScenStk_data}
+## ----plot_catchScenStk_data---------------------------------------------------
 data
-```
 
-
-The second object, `adv`, is a `data.frame` containing the advised catch by stock. The expected variable names are `advice` by `stock`. Optionally, the advice levels associated with Fmsy upper (`upper`) and Fmsy lower (`lower`) can be included. Where Fmsy upper or Fmsy lower advice levels are not applicable, one should duplicate the advice levels (e.g. no Fmsy upper advice is given for COD-NS given it's poor status, SSB < Btrigger, in the advice year, thus the advice and upper values are the same).
-
-```{r plot_catchScenStk_adv_prep, include=FALSE}
+## ----plot_catchScenStk_adv_prep, include=FALSE--------------------------------
 # make data.frame of advice reference values 
 adv <- rbind(
   data.frame(stock = "COD-NS", advice = 14276, lower = 9701, upper = 14276),
@@ -142,17 +70,11 @@ adv <- rbind(
 
 # replace short stock name with ICES stock code
 adv$stock <- refTable$stock[match(adv$stock, refTable$stock_short)]
-```
 
-```{r plot_catchScenStk_adv}
+## ----plot_catchScenStk_adv----------------------------------------------------
 adv
-```
 
-
-
-The two objects are then passed to `plot_catchScenStk` for the final plot.
-
-```{r plot_catchScenStk_output, out.width="70%", out.height="70%"}
+## ----plot_catchScenStk_output, out.width="70%", out.height="70%"--------------
 p <- plot_catchScenStk(data = data, adv = adv)
 # print(p)
 
@@ -163,21 +85,8 @@ out <- dev.off()
 
 tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
-```
 
-
-
-See `?plot_catchScenStk` for further argument details.
-
-
-
-## Fleet effort restriction plot
-
-Two main objects used by the `plot_effortFltStk` function: a `data` object and a `refTable` object containing information on plotting colors for added consistency across several subsequent plots. 
-
-The `data` object contains the effort required for each `fleet` to take up it's quota share (`quotaEffort`) of each `stock`. In addition, the status quo effort (`sqEffort`) by fleet is provided for reference. This should be each fleet's respective effort used for the intermediate year in the short-term forecast. Finally, The variable `Limitation` provides information on most- and least-limiting stocks for each fleet (lowest and highest `quotaEffort`, respectively), while other stocks are designated with `NA`.
-
-```{r plot_effortFltStk_data_prep, include=FALSE}
+## ----plot_effortFltStk_data_prep, include=FALSE-------------------------------
 data(refTable) # reference table with stock advice names, colors, order, etc.
 data(stfFltSum) # summary of fleet-related variables (e.g. effort)
 data(stfFltStkSum) # summary of fleet/stock-related catch variables
@@ -229,25 +138,15 @@ df2 <- do.call("rbind", df2)
 df2$stock <- refTable$stock[match(df2$stock, refTable$stock_short)]
 
 data <- df2[,c("fleet", "stock", "catch", "Limitation", "quotaEffort", "sqEffort")]
-```
 
-```{r plot_effortFltStk_data}
+## ----plot_effortFltStk_data---------------------------------------------------
 data[1:100,]
-```
 
-The reference table (`refTable`) provides information on plotting `order`, and `color`, used by many subsequent plots to maintain consistent presentation. The variable `stock` should contain the ICES stock codes, which are used in through in advice documents. In this example, the optional column `stock_short` is used as a look-up name to replace the shortened stock names used in the North Sea mixed fishery model with the ICES stock codes. A couple non-standard stocks have been added to the North Sea `refTable` ("nep.fu6-9", "Nephrops") as several plots end up grouping *Nephrops* function units (FUs) for simplicity. Similar adjustments may exist for other case studies, and the `refTable` can be adjusted accordingly.
-
-```{r refTab}
+## ----refTab-------------------------------------------------------------------
 data("refTable")
 refTable
-```
 
-
-
-
-The two objects are then passed to `plot_effortFltStk` for the final plot.
-
-```{r plot_effortFltStk_output, out.width="70%", out.height="70%"}
+## ----plot_effortFltStk_output, out.width="70%", out.height="70%"--------------
 p <- plot_effortFltStk(data = data, refTable = refTable)
 
 fname <- paste0(tempfile(), ".png")
@@ -257,15 +156,8 @@ out <- dev.off()
 
 tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
-```
 
-
-
-## Landing by stock plot
-
-The typical pie-chart showing historical (observed) landings or catches by stock in the final data year can be produced with `plot_landByStock`. The function again requires a `data` object and the `refTable` look-up table for colors to be used by stock. The `data` object contains a `stock` variable and a `value` variable with either observed landings (typical) or catches (define label with `ylab`).   
-
-```{r plot_landByStock_data_prep, include = FALSE}
+## ----plot_landByStock_data_prep, include = FALSE------------------------------
 # make example data
 data(stfFltStkSum)
 head(stfFltStkSum)
@@ -289,16 +181,11 @@ agg$stock <- refTable$stock[match(agg$stock, refTable$stock_short)]
 
 names(agg) <- c("stock", "value")
 data <- agg
-```
 
-
-```{r plot_landByStock_data}
+## ----plot_landByStock_data----------------------------------------------------
 data
-```
 
-
-
-```{r plot_landByStock_output, out.width="70%", out.height="70%"}
+## ----plot_landByStock_output, out.width="70%", out.height="70%"---------------
 p <- plot_landByStock(data = data, refTable)
 
 fname <- paste0(tempfile(), ".png")
@@ -309,15 +196,8 @@ out <- dev.off()
 tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 
-```
 
-
-
-## Landing by metier and stock plot
-
-The last standard plot (`plot_landByMetStock`) shows the historical (observed) landings or catches by stock and metier in the final data year. The function again requires a `data` object and the `refTable` look-up table for colors to be used by stock. The `data` object contains a `stock` and `metier` variables, as well as a `value` variable with either observed landings (typical) or catches (define label with `ylab`). Note that the definition of `metier` categories is not standardised and each case study may choose to use a different definition.  
-
-```{r plot_landByMetStock_prep, include = FALSE}
+## ----plot_landByMetStock_prep, include = FALSE--------------------------------
 # make example data
 data(stfMtStkSum)
 head(stfMtStkSum)
@@ -357,14 +237,11 @@ agg <- subset(agg, metier %in% metIncl)
 agg$stock <- refTable$stock[match(agg$stock, refTable$stock_short)]
 
 data <- agg
-```
 
-
-```{r plot_landByMetStock_data}
+## ----plot_landByMetStock_data-------------------------------------------------
 data
-```
 
-```{r plot_landByMetStock_output, out.width="70%", out.height="70%"}
+## ----plot_landByMetStock_output, out.width="70%", out.height="70%"------------
 p <- plot_landByMetStock(data = data, refTable)
 
 fname <- paste0(tempfile(), ".png")
@@ -375,17 +252,8 @@ out <- dev.off()
 tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 
-```
 
-
-# Other plotting functions
-
-The *mixfishtools* package contains several other plotting functions that may be used in the accompanying advice report, but are not yet included in the advice document. 
-
-
-## Catch composition
-
-```{r plot_catchComp_data_prep, include=FALSE}
+## ----plot_catchComp_data_prep, include=FALSE----------------------------------
 # prepare example data
 data(refTable)
 data(stfMtStkSum)
@@ -402,16 +270,11 @@ data$country <- unlist(lapply(tmp, FUN = function(x){ifelse(length(x)==2, x[1], 
 
 # replace stock with ICES stock code
 data$stock <- refTable$stock[match(data$stock, refTable$stock_short)]
-```
 
-```{r plot_catchComp_data}
+## ----plot_catchComp_data------------------------------------------------------
 data[1:100,]
-```
 
-
-### Plot catch composition for each fleet over time
-
-```{r plot_catchComp_output, out.width="70%", out.height="70%"}
+## ----plot_catchComp_output, out.width="70%", out.height="70%"-----------------
 selectors <- c("year")
 divider <- c("fleet")
 p <- plot_catchComp(data, refTable, filters = NULL, selectors, divider, yvar = "catch")
@@ -428,12 +291,8 @@ out <- dev.off()
 
 tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
-```
 
-### Plot landings composition for each area by country-metier combinations
-
-
-```{r plot_catchComp_output2, out.width="70%", out.height="70%"}
+## ----plot_catchComp_output2, out.width="70%", out.height="70%"----------------
 selectors <- c("country", "metier")
 divider <- c("area")
 p <- plot_catchComp(data,refTable,filters = NULL,selectors, divider)
@@ -447,12 +306,8 @@ out <- dev.off()
 
 tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
-```
 
-
-### Plot landings composition for each metier by country for single year
-
-```{r plot_catchComp_output3, out.width="70%", out.height="70%"}
+## ----plot_catchComp_output3, out.width="70%", out.height="70%"----------------
 filters <- list(year = 2020) # e.g. last historical data year
 selectors <- c("metier")
 divider <- c("country")
@@ -468,15 +323,8 @@ out <- dev.off()
 
 tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
-```
 
-## Over-/under-quota plot
-
-Two main objects used by the `plot_overUnderFltStk` function: a `data` object and the `refTable` object. 
-
-The `data` object contains the `catch` per stock and fleet, and associated quota uptake (`quotaUpt`), which is the ratio of the catch to the fleet's quota share (i.e. a value of `1.0` means full uptake). Finally, The variable `Limitation` provides information on most- and least-limiting stocks for each fleet (lowest and highest `quotaEffort`, respectively), while other stocks are designated with `NA`.
-
-```{r plot_overUnderFltStk_data_prep, include=FALSE}
+## ----plot_overUnderFltStk_data_prep, include=FALSE----------------------------
 data(refTable) # reference table with stock advice names, colors, order, etc.
 data(stfFltSum) # summary of fleet-related variables (e.g. effort)
 data(stfFltStkSum) # summary of fleet/stock-related catch variables
@@ -528,15 +376,11 @@ df2 <- do.call("rbind", df2)
 # replace short stock names with ICES stock codes
 df2$stock <- refTable$stock[match(df2$stock, refTable$stock_short)]
 data <- df2[,c("fleet", "stock", "catch", "quotaUpt", "Limitation")]
-```
 
-```{r plot_overUnderFltStk_data}
+## ----plot_overUnderFltStk_data------------------------------------------------
 data[1:100,]
-```
 
-
-
-```{r plot_overUnderFltStk_output, out.width="70%", out.height="70%"}
+## ----plot_overUnderFltStk_output, out.width="70%", out.height="70%"-----------
 p <- plot_overUnderFltStk(data = df2, refTable = refTable)
 
 
@@ -547,17 +391,8 @@ out <- dev.off()
 
 tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
-```
 
-
-
-## Catch alluvial plot
-
-Two main objects used by the `plot_catchAlluvial` function: a `data` object and the `refTable` object. 
-
-The `data` object contains the catches or landings (variable `value`) per `fleet`, `metier` and `stock`. The typical `refTable` object is also used to, which contains the corresponding colors (`col`), plotting order (`order`) for each `stock`.
-
-```{r plot_catchAlluvial_data_prep, include=FALSE}
+## ----plot_catchAlluvial_data_prep, include=FALSE------------------------------
 data("stfMtStkSum")
 data("refTable")
 
@@ -571,15 +406,11 @@ data <- subset(stfMtStkSum, year == 2020 & scenario == "min" &
   country == "BE")[,c("fleet", "metier", "stock", "landings")]
 data$stock <- refTable$stock[match(data$stock, refTable$stock_short)]
 names(data)[4] <- "value"
-```
 
-```{r plot_catchAlluvial_data}
+## ----plot_catchAlluvial_data--------------------------------------------------
 data[1:100,]
-```
 
-
-
-```{r plot_catchAlluvial_output, out.width="70%", out.height="70%"}
+## ----plot_catchAlluvial_output, out.width="70%", out.height="70%"-------------
 p <- plot_catchAlluvial(data = data, refTable = refTable, text_size = 2)
 
 fname <- paste0(tempfile(), ".png")
@@ -589,12 +420,8 @@ out <- dev.off()
 
 tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
-```
 
-As in the above example, labels may overlap with many levels or small contributions. The plotting function has the option to try and arrange the labels to prevent overlapping using the `ggrepel` package (argument: `text_repel = TRUE`):
-
-
-```{r plot_catchAlluvial_output2, out.width="70%", out.height="70%"}
+## ----plot_catchAlluvial_output2, out.width="70%", out.height="70%"------------
 p <- plot_catchAlluvial(data = data, refTable = refTable, text_size = 2, 
   text_repel = TRUE, stratum_width = 0.2, nudge_x = 0.3, mult_x = c(0.1, 0.3))
 
@@ -605,13 +432,8 @@ out <- dev.off()
 
 tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
-```
 
-
-By default, the plot contains a legend as to the fill colors of the stocks. This may be removed if the final stock stratum colors are labelled clearly enough (argument: `addLegend = FALSE`). The following example also defines a different fill color for the non-stock strata:
-
-
-```{r plot_catchAlluvial_output3, out.width="70%", out.height="70%"}
+## ----plot_catchAlluvial_output3, out.width="70%", out.height="70%"------------
 p <- plot_catchAlluvial(data = data, refTable = refTable, text_size = 2, 
   text_repel = TRUE, stratum_width = 0.2, nudge_x = 0.3, mult_x = c(0.1, 0.3), 
   addLegend = FALSE, stratum_col = "grey90")
@@ -623,5 +445,4 @@ out <- dev.off()
 
 tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
-```
 

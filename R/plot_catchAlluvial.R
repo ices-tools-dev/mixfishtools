@@ -32,6 +32,7 @@
 #' @param addLegend logical Should legend of stock fill colors be added
 #'
 #' @return plot output of class ggplot
+#' @import ggplot2 ggalluvial ggrepel
 #' @export
 #'
 #' @examples

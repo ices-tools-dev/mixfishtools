@@ -9,6 +9,7 @@
 
 ^vignettes/cache$
 ^vignettes/tex$
-^doc$
 
+^doc$
 ^Meta$
+
