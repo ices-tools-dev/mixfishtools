@@ -12,7 +12,8 @@ Depends:
     ggplot2,
     ggrepel,
     ggalluvial,
-    dplyr
+    dplyr,
+    RColorBrewer
 Suggests:
     tidyr,
     png,
