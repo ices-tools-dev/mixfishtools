@@ -177,3 +177,22 @@ haddockWts <- list(
 save(haddockWts, file = "data/haddockWts.rda", compress = "xz")
 
 
+
+
+# stock_props -------------------------------------------------------------
+load(file = "data-raw/stock_props.RData")
+stock_props <- as.data.frame(stock_props)
+save(stock_props, file = "data/stock_props.rda", compress = "xz")
+
+
+# NSlandings -------------------------------------------------------------
+load(file = "data-raw/NSlandings.RData")
+NSlandings <- as.data.frame(dat)
+save(NSlandings, file = "data/NSlandings.rda", compress = "xz")
+
+# NSeffort -------------------------------------------------------------
+load(file = "data-raw/NSeffort.RData")
+NSeffort <- as.data.frame(dat)
+save(NSeffort, file = "data/NSeffort.rda", compress = "xz")
+
+
