@@ -4,19 +4,33 @@
 \alias{plot_catchCompSpp}
 \title{Plot landings (catch) composition by country and species}
 \usage{
-plot_catchCompSpp(data, land_threshold = 10)
+plot_catchCompSpp(
+  data,
+  refTable,
+  land_threshold = 10,
+  fillLegendTitle = "Species"
+)
 }
 \arguments{
 \item{data}{data.frame Contains information on the total landings of species
 listed in the WGMIXFISH data call by country and metier category.
 Required variables are: `country` (2 letter country code),
-`metCat` (which indicates the metier categories), `MIXFISHspp` (which
+`metCat` (which indicates the metier categories), `spp` (which
 indicates the 3 letter FAO species code as listed in the WGMIXFISH
 data call), and `landings`.}
+
+\item{refTable}{data.frame Contains stock look-up information for consistent
+plotting of stocks. `spp` defines the species names corresponding to
+`data` object. `col` defines the color used to fill bars in plot.
+`order` defines the order of stocks in the plot facets. `label` = label to
+use in the fill color legend}
 
 \item{land_threshold}{numeric A number, in tonnes, to set a minimum landings
 threshold. Metier-country combinations with total landings below this
 threshold will not be plotted. Default value is 10 tonnes.}
+
+\item{fillLegendTitle}{character Fill legend title
+(Default: `fillLegendTitle = "Species"`)}
 }
 \value{
 plot output of class ggplot
@@ -34,6 +48,11 @@ Users will need to provide the data to produce the plot.
 data(NSlandings)
 
 dat <- NSlandings
+
+# rename
+names(dat)[which(names(dat)=="MIXFISHspp")] <- "spp"
+
+
 # aggregate some metiers
 dat <- dat \%>\% mutate(metCat = if_else(metCat \%in\%
   c("dredges","beam_oth"),"MIS",metCat))
@@ -45,14 +64,85 @@ dat <- dat \%>\% mutate(
 # re-aggregate
 datayear <- 2023
 dat <- dat \%>\% filter(Year \%in\% datayear) \%>\%
-  group_by(country=Country,metCat,MIXFISHspp) \%>\%
+  group_by(country=Country, metCat, spp) \%>\%
   summarise(landings=sum(Landings))
 
 # Set landings threshold
 land_th <- 10 # 10 tonnes.
 
+# group some species together to make plotting easier
+dat <- dat \%>\% mutate(spp = if_else(spp \%in\%
+  c("ANK","MON"),"ANF", spp))
+dat <- dat \%>\% mutate(spp = if_else(spp \%in\%
+  c("MEG","LDB"),"LEZ", spp))
+dat <- dat \%>\% mutate(spp = if_else(spp \%in\%
+  c("GUG","GUR"),"Gurnards", spp))
+
+# remove less important species from data call to make plotting easier
+dat <- dat \%>\% filter(!spp \%in\%
+  c("OTH","CAA","COE","HAL","HER","MAC","WHB","HOM","SPR"))
+
+# re-aggregate
+dat <- dat \%>\% group_by(country, metCat, spp) \%>\% summarise(landings=sum(landings))
+
+
+# make color lookup data.frame (refTable)
+COLS <- c(brewer.pal(n = 9, name = "YlOrBr")[c(2,4)],
+  brewer.pal(n = 9, name = "Oranges")[c(6)],
+  brewer.pal(n = 9, name = "Reds")[c(8)],
+  brewer.pal(n = 11, name = "PRGn")[c(4,3,2,1)],
+  brewer.pal(n = 9, name = "PiYG")[c(4,2,1)],
+  brewer.pal(n = 9, name = "Blues")[c(4,6,8,9)],
+  brewer.pal(n = 11, name = "BrBG")[c(7:10)],
+  brewer.pal(n = 9, name = "Greens")[c(3,6,8)],
+  brewer.pal(n = 11, name = "BrBG")[c(1:4)],
+  brewer.pal(n = 9, name = "Greys")[c(3,5,7)])
+
+
 # plot
-# windows()
-plot_catchCompSpp(dat, land_threshold=land_th)
+# possible colors
+COLS <- c(brewer.pal(n = 9, name = "YlOrBr")[c(2,4)],
+  brewer.pal(n = 9, name = "Oranges")[c(6)],
+  brewer.pal(n = 9, name = "Reds")[c(8)],
+  brewer.pal(n = 11, name = "PRGn")[c(4,3,2,1)],
+  brewer.pal(n = 9, name = "PiYG")[c(4,2,1)],
+  brewer.pal(n = 9, name = "Blues")[c(4,6,8,9)],
+  brewer.pal(n = 11, name = "BrBG")[c(7:10)],
+  brewer.pal(n = 9, name = "Greens")[c(3,6,8)],
+  brewer.pal(n = 11, name = "BrBG")[c(1:4)],
+  brewer.pal(n = 9, name = "Greys")[c(3,5,7)])
+
+
+refTable <- as.data.frame(rbind(
+  c("ANF", "Anglerfishes"),
+  c("BLL", "Brill"),
+  c("COD", "Cod"),
+  c("DAB", "Dab"),
+  c("FLE", "Flounder"),
+  c("Gurnards", "Gurnards"),
+  c("HAD", "Haddock"),
+  c("LEM", "Lemon sole"),
+  c("LIN", "Ling"),
+  c("PLE", "Plaice"),
+  c("SKA", "Skates and rays"),
+  c("SOL", "Sole"),
+  c("TUR", "Turbot"),
+  c("WHG", "Whiting"),
+  c("HKE", "Hake"),
+  c("POK", "Saithe"),
+  c("POL", "Pollack"),
+  c("WIT", "Witch"),
+  c("LEZ", "Megrim"),
+  c("NEP", "Norway lobster"),
+  c("SDV", "Smoothhounds"),
+  c("NOP", "Norway pout")
+))
+names(refTable) <- c("spp", "label")
+refTable$col <- COLS[seq(nrow(refTable))]
+refTable$order <- seq(nrow(refTable))
+
+plot_catchCompSpp( data = dat, refTable = refTable, land_threshold=land_th)
+
+
 
 }
