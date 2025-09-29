@@ -32,7 +32,7 @@ plot_stkMetProp <- function(data){
   level_order <- temp$metCat
 
   p <- ggplot(data %>% filter(metCat %in% level_order)) +
-    aes(x = Stock , y = factor(metCat, level = level_order),  fill = prop_stock) +
+    aes(x = Stock , y = factor(metCat, levels = level_order),  fill = prop_stock) +
     geom_tile(color = "white", lwd = 1, linetype = 1) +
     scale_x_continuous(position = "top",
                        breaks = unique(data$Stock),

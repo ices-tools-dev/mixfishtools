@@ -2,7 +2,7 @@
 
 export(gm_mean)
 export(plot_FOgearType)
-export(plot_catchAlluvial)
+export(plot_alluvial)
 export(plot_catchComp)
 export(plot_catchCompSpp)
 export(plot_catchCompStk)

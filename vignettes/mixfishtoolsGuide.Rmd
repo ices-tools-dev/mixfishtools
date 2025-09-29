@@ -553,9 +553,12 @@ knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 
 ## Catch alluvial plot
 
-Two main objects used by the `plot_catchAlluvial` function: a `data` object and the `refTable` object. 
+Two main objects used by the `plot_alluvial` function: a `data` object and the `refTable` object. 
 
 The `data` object contains the catches or landings (variable `value`) per `fleet`, `metier` and `stock`. The typical `refTable` object is also used to, which contains the corresponding colors (`col`), plotting order (`order`) for each `stock`.
+
+The `data` object contains information for making an alluvial-type plot (e.g. catch or landings). This data.frame should contain several variables for grouping (Default: `group_vars = c("fleet", "metier", "stock")`) as well as a variable to plot values (`value`). The typical `refTable` object is also used to contains the corresponding colors (`col`) and plotting order (`order`) for each level of the grouping variable used for fill colors (Default: `fill_var = "stock"`). See 
+`?plot_alluvial` for further settings.
 
 ```{r plot_catchAlluvial_data_prep, include=FALSE}
 data("stfMtStkSum")
@@ -573,14 +576,14 @@ data$stock <- refTable$stock[match(data$stock, refTable$stock_short)]
 names(data)[4] <- "value"
 ```
 
-```{r plot_catchAlluvial_data}
+```{r plot_alluvial_data}
 data[1:100,]
 ```
 
 
 
 ```{r plot_catchAlluvial_output, out.width="70%", out.height="70%"}
-p <- plot_catchAlluvial(data = data, refTable = refTable, text_size = 2)
+p <- plot_alluvial(data = data, refTable = refTable, text_size = 2)
 
 fname <- paste0(tempfile(), ".png")
 png(fname, width = 6, height = 6, units = "in", res = 400)
@@ -594,8 +597,8 @@ knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 As in the above example, labels may overlap with many levels or small contributions. The plotting function has the option to try and arrange the labels to prevent overlapping using the `ggrepel` package (argument: `text_repel = TRUE`):
 
 
-```{r plot_catchAlluvial_output2, out.width="70%", out.height="70%"}
-p <- plot_catchAlluvial(data = data, refTable = refTable, text_size = 2, 
+```{r plot_alluvial_output2, out.width="70%", out.height="70%"}
+p <- plot_alluvial(data = data, refTable = refTable, text_size = 2, 
   text_repel = TRUE, stratum_width = 0.2, nudge_x = 0.3, mult_x = c(0.1, 0.3))
 
 fname <- paste0(tempfile(), ".png")
@@ -612,7 +615,7 @@ By default, the plot contains a legend as to the fill colors of the stocks. This
 
 
 ```{r plot_catchAlluvial_output3, out.width="70%", out.height="70%"}
-p <- plot_catchAlluvial(data = data, refTable = refTable, text_size = 2, 
+p <- plot_alluvial(data = data, refTable = refTable, text_size = 2, 
   text_repel = TRUE, stratum_width = 0.2, nudge_x = 0.3, mult_x = c(0.1, 0.3), 
   addLegend = FALSE, stratum_col = "grey90")
 
