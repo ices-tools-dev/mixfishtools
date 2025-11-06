@@ -23,7 +23,7 @@
 #' # plot
 #' plot_stkMetProp(stock_props)
 #'
-plot_stkMetProp <- function(data){
+plot_stkMetProp <- function(data, text_size = 9, face = "plain"){
   # order metier categories by importance in terms of landings over all stocks
 
   temp <- data %>% group_by(metCat) %>% summarise(prop_stock=sum(prop_stock,na.rm=TRUE))
@@ -46,9 +46,10 @@ plot_stkMetProp <- function(data){
           panel.grid.major.y = element_blank(),
           panel.background = element_blank(),
           strip.background = element_rect(colour= NA, fill=NA),
-          axis.text.x.top = element_text(angle = 90, hjust = 0, vjust = 0.3),
-          axis.text.x.bottom = element_text(size= 7,angle=45,vjust=1,hjust=1),
-          text = element_text(size = 9)) +
+           axis.text.x.top = element_text(size= text_size, angle = 90, hjust = 0, vjust = 0.3),
+          axis.text.y = element_text(size= text_size, hjust = 1, vjust = 0),
+          axis.text.x.bottom = element_text(size= text_size, angle=45,vjust=1,hjust=1),
+          text = element_text(size = text_size, face = face)) +
     coord_fixed() +
     xlab("") +
     ylab("Metier")
