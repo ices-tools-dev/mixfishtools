@@ -116,77 +116,121 @@
 #' plot_catchComp(data,refTable,filters,selectors, divider, flipAxes = T)
 #'
 #'
-plot_catchComp <- function(data, refTable, filters = NULL,
-  selectors = "metier", divider = NULL, yvar = "landings",
+plot_catchComp <- function(
+  data,
+  refTable,
+  filters = NULL,
+  selectors = "metier",
+  divider = NULL,
+  yvar = "landings",
   tryNumericSelector = FALSE,
-  flipAxes = FALSE, relative = TRUE){
+  flipAxes = FALSE,
+  relative = TRUE
+){
 
   position_type <- if (relative) "fill" else "stack"
 
-  # filters filter the data
-  # selectors select the level of data aggregation. They get pasted together
-  # into a label which is used to aggregate. i.e. the x axis labels
-  # divider provides a variable over which to disaggregate the data for
-  # comparison. i.e. facets in the plot
-  if(!is.null(filters)){
-    # filter
-    for (var in names(filters)){
-      data <- data %>% filter(.data[[var]] %in% filters[[var]]) # this works but might be a deprecated method
+  # ---------------------------
+  # 1. Filters
+  # ---------------------------
+  if (!is.null(filters)) {
+    for (var in names(filters)) {
+      data <- data %>%
+        dplyr::filter(.data[[var]] %in% filters[[var]])
     }
   }
 
-  if(length(divider) > 1){
-    stop("only 1 variable can be provided as a divider")
-  }
-
-  # check area codes. NA = notSpecified
-  if(any(is.na(data$area))){
+  # ---------------------------
+  # 2. Clean area
+  # ---------------------------
+  if ("area" %in% names(data)) {
     data$area[is.na(data$area)] <- "notSpecified"
   }
 
-  # aggregate by selectors by concatenating selectors into 1 label
-  # label and stock are always selectors
-  data$label <- apply(select(ungroup(data),all_of(selectors)), 1, paste, collapse = "_")
-  data <- data %>% group_by(across(all_of(c("label", "stock", divider)))) %>%
-    summarise(VAR = sum(get(yvar), na.rm = TRUE), .groups = "drop")
+  # ---------------------------
+  # 3. Build label
+  # ---------------------------
+  selector_cols <- intersect(selectors, names(data))
 
-  if(tryNumericSelector){
-    data <- data |> mutate(label = as.numeric(label))
+  if (length(selector_cols) == 0) {
+    stop("None of the selectors exist in the data")
   }
 
-  # get colour scale by merging with refTable
-  data <- left_join(data, refTable, by="stock")
-  tmp <- unique(data[,c("stock", "col", "order")])
-  tmp <- tmp[order(tmp$order),]
+  data <- data %>%
+    dplyr::mutate(
+      label = do.call(paste, c(dplyr::across(dplyr::all_of(selector_cols)), sep = "_"))
+    )
+
+  # ---------------------------
+  # 4. Group & summarise
+  # ---------------------------
+  group_vars <- c("label", "stock", divider)
+  group_vars <- group_vars[!is.na(group_vars)]
+
+  data <- data %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(group_vars))) %>%
+    dplyr::summarise(
+      VAR = sum(.data[[yvar]], na.rm = TRUE),
+      .groups = "drop"
+    )
+
+  # ---------------------------
+  # 5. Optional numeric label
+  # ---------------------------
+  if (tryNumericSelector) {
+    data <- data %>%
+      dplyr::mutate(label = as.numeric(label))
+  }
+
+  # ---------------------------
+  # 6. Colours
+  # ---------------------------
+  data <- dplyr::left_join(data, refTable, by = "stock")
+
+  tmp <- unique(data[, c("stock", "col", "order")])
+  tmp <- tmp[order(tmp$order), ]
+
   stkColors <- tmp$col
   names(stkColors) <- tmp$stock
-  stkColorScale <- scale_colour_manual(name = "stock", values = stkColors,
-    aesthetics = c("colour", "fill"))
 
-  # ensure plotting order
+  stkColorScale <- ggplot2::scale_colour_manual(
+    name = "stock",
+    values = stkColors,
+    aesthetics = c("colour", "fill")
+  )
+
   data$stock <- factor(data$stock, levels = tmp$stock)
 
-  # plot
-  p <- ggplot(data, aes(x = label, y = VAR, colour = stock, fill = stock))+
-    geom_col(position = position_type) +
-    # geom_area(position = position_type) +
-    labs(x = "", y = "", fill = "", colour = "") +
-    theme_bw() +
+  # ---------------------------
+  # 7. Plot
+  # ---------------------------
+  p <- ggplot2::ggplot(
+    data,
+    ggplot2::aes(x = label, y = VAR, colour = stock, fill = stock)
+  ) +
+    ggplot2::geom_col(position = position_type) +
+    ggplot2::labs(x = "", y = "", fill = "", colour = "") +
+    ggplot2::theme_bw() +
     stkColorScale +
-    guides(fill = guide_legend(ncol = 1)) +
-    guides(colour = guide_legend(ncol = 1))
+    ggplot2::guides(
+      fill = ggplot2::guide_legend(ncol = 1),
+      colour = ggplot2::guide_legend(ncol = 1)
+    )
 
-  if(flipAxes){
-    p <- p + coord_flip()
+  if (flipAxes) {
+    p <- p + ggplot2::coord_flip()
   }
 
-  if(!is.null(divider)){
-    p <- p + facet_wrap(as.formula(paste("~", divider)),
-      scales = "free")
+  # ---------------------------
+  # 8. Facets (safe evaluation)
+  # ---------------------------
+  if (!is.null(divider)) {
+    p <- p +
+      ggplot2::facet_wrap(
+        stats::as.formula(paste("~", divider)),
+        scales = "free"
+      )
   }
 
   return(p)
-
 }
-
-
