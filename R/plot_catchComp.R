@@ -26,12 +26,21 @@
 #'  concatenated into a "label" for plotting. The default value is \code{metier} and will produce catch
 #'  compositions by `metier`.
 #'
-#' @param divider character string of one of `year`, `area`,`country`, `fleet` or `metier`. Only one variable can be
-#' listed as a `divider`. The chosen divider will be used to divide the catch compositions into subplots - e.g. one per
-#' `fleet`. The default value of \code{NULL} will plot just one catch composition (i.e. no subplots).
+#' @param divider character string of one of `year`, `area`,`country`,
+#'   `fleet` or `metier`. Only one variable can be listed as a `divider`.
+#'   The chosen divider will be used to divide the catch compositions into
+#'   subplots - e.g. one per`fleet`. The default value of \code{NULL} will
+#'   plot just one catch composition (i.e. no subplots).
 #'
 #' @param yvar character string of variable to be plotted on the y-axis (Default: yvar = "landings")
 #'
+#' @param tryNumericSelector logical. Should the selector variable be converted
+#'   to a numeric variable. Likely only makes sense when `selector = "year"`
+#'   (Default: `tryNumericSelector = FALSE`)
+#' @param flipAxes logical. Should `coord_flip` be applied to flip x- and
+#'   y-axes. (Default: `flipAxes = FALSE`)
+#' @param relative logical. Should composition be presented in relative terms
+#'   (Default: `relative = TRUE`)
 #'
 #' @details Users will need to provide the data and refTable objects to produce the plot.
 #'
@@ -63,41 +72,56 @@
 #' # Plot catch composition for each fleet over time
 #' selectors <- c("year")
 #' divider <- c("fleet")
-#' p <- plot_catchComp(data, refTable, filters = NULL, selectors, divider, yvar = "catch")
+#' p <- plot_catchComp(data,refTable, filters = NULL,
+#'   selectors = selectors, divider = divider, yvar = "catch")
 #' print(p)
+#'
 #'
 #' # ggplot format adjustments
 #' p2 <- p + theme(text = element_text(size = 8),
-#'   axis.text.x = element_text(angle = 90, vjust = 0, hjust=1)) +
+#'   axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
 #'   facet_wrap(divider,  scales = "fixed") # remove free axes
 #' print(p2)
+#'
+#' # Remove relative scaling, and treat year axis (selector) as numeric
+#' plot_catchComp(data, refTable, filters = NULL, selectors, divider,
+#'   yvar = "catch", relative = FALSE, tryNumericSelector = TRUE) +
+#'   theme(text = element_text(size = 8),
+#'     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+#'   facet_wrap(divider, ncol = 6, scales = "free_y")
 #'
 #' # export plot
 #' # png("catchComp1.png", width = 7, height = 7, units = "in", res = 400)
 #' #  print(p2); dev.off()
 #'
 #'
-#' # Plot landings composition for each area by country-metier combinations
+#' # lot landings composition for each area by country-metier combinations
 #' selectors <- c("country", "metier")
 #' divider <- c("area")
-#' p <- plot_catchComp(data,refTable,filters=NULL,selectors, divider)
+#' p <- plot_catchComp(data, refTable, filters=NULL,
+#'   selectors, divider, relative = TRUE, flipAxes = T)
 #' print(p)
 #'
-#' # Plot landings composition for each metier by country for 2022
+#'
+#' # plot landings composition for each metier by country for 2022
 #' filters <- list(year = 2022)
 #' selectors <- c("metier")
 #' divider <- c("country")
-#' plot_catchComp(data, refTable, filters, selectors, divider)
+#' plot_catchComp(data, refTable, filters, selectors, divider, flipAxes = T)
 #'
-#' # Plot landings compositions for each fleet by metier for Scottish fleets.
+#' # plot landings compositions for each fleet by metier for Scottish fleets.
 #' filters <- list(year=2022, country="SC")
 #' selectors <- c("metier")
 #' divider <- c("fleet")
-#' plot_catchComp(data,refTable,filters,selectors, divider)
+#' plot_catchComp(data,refTable,filters,selectors, divider, flipAxes = T)
 #'
 #'
-plot_catchComp <- function(data, refTable, filters=NULL,
-  selectors = "metier", divider = NULL, yvar = "landings"){
+plot_catchComp <- function(data, refTable, filters = NULL,
+  selectors = "metier", divider = NULL, yvar = "landings",
+  tryNumericSelector = FALSE,
+  flipAxes = FALSE, relative = TRUE){
+
+  position_type <- if (relative) "fill" else "stack"
 
   # filters filter the data
   # selectors select the level of data aggregation. They get pasted together
@@ -111,7 +135,7 @@ plot_catchComp <- function(data, refTable, filters=NULL,
     }
   }
 
-  if(length(divider)>1){
+  if(length(divider) > 1){
     stop("only 1 variable can be provided as a divider")
   }
 
@@ -122,13 +146,17 @@ plot_catchComp <- function(data, refTable, filters=NULL,
 
   # aggregate by selectors by concatenating selectors into 1 label
   # label and stock are always selectors
-  data$label <- apply(select(ungroup(data),all_of(selectors)),1,paste,collapse="_")
-  data <- data %>% group_by(across(all_of(c("label","stock",divider)))) %>%
-    summarise(VAR=sum(get(yvar),na.rm=T))
+  data$label <- apply(select(ungroup(data),all_of(selectors)), 1, paste, collapse = "_")
+  data <- data %>% group_by(across(all_of(c("label", "stock", divider)))) %>%
+    summarise(VAR = sum(get(yvar), na.rm = TRUE), .groups = "drop")
+
+  if(tryNumericSelector){
+    data <- data |> mutate(label = as.numeric(label))
+  }
 
   # get colour scale by merging with refTable
-  data <- left_join(data,refTable,by="stock")
-  tmp <- unique(data[,c("stock","col", "order")])
+  data <- left_join(data, refTable, by="stock")
+  tmp <- unique(data[,c("stock", "col", "order")])
   tmp <- tmp[order(tmp$order),]
   stkColors <- tmp$col
   names(stkColors) <- tmp$stock
@@ -139,15 +167,26 @@ plot_catchComp <- function(data, refTable, filters=NULL,
   data$stock <- factor(data$stock, levels = tmp$stock)
 
   # plot
-  p <- ggplot(data,aes(x=label,y=VAR,colour=stock,fill=stock))+
-    geom_col(position="fill")+
-    coord_flip()+ labs(x="",y="",fill="",colour="")+
-    theme_bw()+stkColorScale +guides(fill=guide_legend(ncol=1))+guides(colour=guide_legend(ncol=1))
+  p <- ggplot(data, aes(x = label, y = VAR, colour = stock, fill = stock))+
+    geom_col(position = position_type) +
+    # geom_area(position = position_type) +
+    labs(x = "", y = "", fill = "", colour = "") +
+    theme_bw() +
+    stkColorScale +
+    guides(fill = guide_legend(ncol = 1)) +
+    guides(colour = guide_legend(ncol = 1))
+
+  if(flipAxes){
+    p <- p + coord_flip()
+  }
 
   if(!is.null(divider)){
-    p <- p + facet_wrap(divider, scales = "free")
+    p <- p + facet_wrap(as.formula(paste("~", divider)),
+      scales = "free")
   }
 
   return(p)
 
 }
+
+
