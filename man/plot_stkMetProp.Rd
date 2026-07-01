@@ -4,7 +4,7 @@
 \alias{plot_stkMetProp}
 \title{Plot proportion of stock landings by metier}
 \usage{
-plot_stkMetProp(data)
+plot_stkMetProp(data, text_size = 9, face = "plain")
 }
 \arguments{
 \item{data}{data.frame Contains information on the stock, metiers and

@@ -99,7 +99,7 @@
 #' selectors <- c("country", "metier")
 #' divider <- c("area")
 #' p <- plot_catchComp(data, refTable, filters=NULL,
-#'   selectors, divider, relative = TRUE, flipAxes = T)
+#'   selectors, divider, relative = TRUE, flipAxes = TRUE)
 #' print(p)
 #'
 #'
@@ -107,13 +107,13 @@
 #' filters <- list(year = 2022)
 #' selectors <- c("metier")
 #' divider <- c("country")
-#' plot_catchComp(data, refTable, filters, selectors, divider, flipAxes = T)
+#' plot_catchComp(data, refTable, filters, selectors, divider, flipAxes = TRUE)
 #'
 #' # plot landings compositions for each fleet by metier for Scottish fleets.
 #' filters <- list(year=2022, country="SC")
 #' selectors <- c("metier")
 #' divider <- c("fleet")
-#' plot_catchComp(data,refTable,filters,selectors, divider, flipAxes = T)
+#' plot_catchComp(data,refTable,filters,selectors, divider, flipAxes = TRUE)
 #'
 #'
 plot_catchComp <- function(

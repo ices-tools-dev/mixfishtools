@@ -10,7 +10,10 @@ plot_catchComp(
   filters = NULL,
   selectors = "metier",
   divider = NULL,
-  yvar = "landings"
+  yvar = "landings",
+  tryNumericSelector = FALSE,
+  flipAxes = FALSE,
+  relative = TRUE
 )
 }
 \arguments{
@@ -38,11 +41,23 @@ selector will be plotted on the x-axis. Multiple variables can be listed as \cod
 concatenated into a "label" for plotting. The default value is \code{metier} and will produce catch
 compositions by `metier`.}
 
-\item{divider}{character string of one of `year`, `area`,`country`, `fleet` or `metier`. Only one variable can be
-listed as a `divider`. The chosen divider will be used to divide the catch compositions into subplots - e.g. one per
-`fleet`. The default value of \code{NULL} will plot just one catch composition (i.e. no subplots).}
+\item{divider}{character string of one of `year`, `area`,`country`,
+`fleet` or `metier`. Only one variable can be listed as a `divider`.
+The chosen divider will be used to divide the catch compositions into
+subplots - e.g. one per`fleet`. The default value of \code{NULL} will
+plot just one catch composition (i.e. no subplots).}
 
 \item{yvar}{character string of variable to be plotted on the y-axis (Default: yvar = "landings")}
+
+\item{tryNumericSelector}{logical. Should the selector variable be converted
+to a numeric variable. Likely only makes sense when `selector = "year"`
+(Default: `tryNumericSelector = FALSE`)}
+
+\item{flipAxes}{logical. Should `coord_flip` be applied to flip x- and
+y-axes. (Default: `flipAxes = FALSE`)}
+
+\item{relative}{logical. Should composition be presented in relative terms
+(Default: `relative = TRUE`)}
 }
 \value{
 plot output of class ggplot
@@ -76,37 +91,48 @@ data$stock <- refTable$stock[match(data$stock, refTable$stock_short)]
 # Plot catch composition for each fleet over time
 selectors <- c("year")
 divider <- c("fleet")
-p <- plot_catchComp(data, refTable, filters = NULL, selectors, divider, yvar = "catch")
+p <- plot_catchComp(data,refTable, filters = NULL,
+  selectors = selectors, divider = divider, yvar = "catch")
 print(p)
+
 
 # ggplot format adjustments
 p2 <- p + theme(text = element_text(size = 8),
-  axis.text.x = element_text(angle = 90, vjust = 0, hjust=1)) +
+  axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   facet_wrap(divider,  scales = "fixed") # remove free axes
 print(p2)
+
+# Remove relative scaling, and treat year axis (selector) as numeric
+plot_catchComp(data, refTable, filters = NULL, selectors, divider,
+  yvar = "catch", relative = FALSE, tryNumericSelector = TRUE) +
+  theme(text = element_text(size = 8),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  facet_wrap(divider, ncol = 6, scales = "free_y")
 
 # export plot
 # png("catchComp1.png", width = 7, height = 7, units = "in", res = 400)
 #  print(p2); dev.off()
 
 
-# Plot landings composition for each area by country-metier combinations
+# lot landings composition for each area by country-metier combinations
 selectors <- c("country", "metier")
 divider <- c("area")
-p <- plot_catchComp(data,refTable,filters=NULL,selectors, divider)
+p <- plot_catchComp(data, refTable, filters=NULL,
+  selectors, divider, relative = TRUE, flipAxes = TRUE)
 print(p)
 
-# Plot landings composition for each metier by country for 2022
+
+# plot landings composition for each metier by country for 2022
 filters <- list(year = 2022)
 selectors <- c("metier")
 divider <- c("country")
-plot_catchComp(data, refTable, filters, selectors, divider)
+plot_catchComp(data, refTable, filters, selectors, divider, flipAxes = TRUE)
 
-# Plot landings compositions for each fleet by metier for Scottish fleets.
+# plot landings compositions for each fleet by metier for Scottish fleets.
 filters <- list(year=2022, country="SC")
 selectors <- c("metier")
 divider <- c("fleet")
-plot_catchComp(data,refTable,filters,selectors, divider)
+plot_catchComp(data,refTable,filters,selectors, divider, flipAxes = TRUE)
 
 
 }

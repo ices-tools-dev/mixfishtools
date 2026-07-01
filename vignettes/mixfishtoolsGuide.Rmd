@@ -435,7 +435,7 @@ knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 
 ### Plot absolute values of catch composition for each fleet over time
 
-```{r plot_catchComp_output, out.width="70%", out.height="70%"}
+```{r plot_catchComp_output2, out.width="70%", out.height="70%"}
 selectors <- c("year")
 divider <- c("fleet")
 p <- plot_catchComp(data, refTable, filters = NULL, relative = FALSE,
@@ -458,7 +458,7 @@ knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 ### Plot landings composition for each area by country-metier combinations
 
 
-```{r plot_catchComp_output2, out.width="70%", out.height="70%"}
+```{r plot_catchComp_output3, out.width="70%", out.height="70%"}
 selectors <- c("country", "metier")
 divider <- c("area")
 p <- plot_catchComp(data,refTable,filters = NULL,selectors, divider, 
@@ -478,7 +478,7 @@ knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 
 ### Plot landings composition for each metier by country for single year
 
-```{r plot_catchComp_output3, out.width="70%", out.height="70%"}
+```{r plot_catchComp_output4, out.width="70%", out.height="70%"}
 filters <- list(year = 2020) # e.g. last historical data year
 selectors <- c("metier")
 divider <- c("country")
