@@ -78,7 +78,7 @@ library(mixfishtools)
 A further package to read and embed the produced .png files:
 
 ```{r load_extra, message=FALSE, warning=FALSE}
-library(mixfishtools)
+library(png)
 ```
 
 
@@ -411,18 +411,43 @@ data[1:100,]
 
 ### Plot catch composition for each fleet over time
 
+Note that the use of `tryNumericSelector = TRUE` may help when selector variable is years, as it will convert these back to numeric values.
+
 ```{r plot_catchComp_output, out.width="70%", out.height="70%"}
 selectors <- c("year")
 divider <- c("fleet")
-p <- plot_catchComp(data, refTable, filters = NULL, selectors, divider, yvar = "catch")
+p <- plot_catchComp(data, refTable, filters = NULL, 
+  selectors, divider, yvar = "catch", tryNumericSelector = TRUE)
 
 # ggplot format adjustments
 p <- p + theme(text = element_text(size = 8),
-  axis.text.x = element_text(angle = 90, vjust = 0, hjust=1)) +
-  facet_wrap(divider,  scales = "fixed") # remove free axes
+  axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  facet_wrap(divider, ncol = 5, scales = "fixed") # remove free axes
 
 fname <- paste0(tempfile(), ".png")
-png(fname, width = 6, height = 6, units = "in", res = 400)
+png(fname, width = 6, height = 7, units = "in", res = 400)
+suppressWarnings(print(p))
+out <- dev.off()
+
+tmp <- png::readPNG(fname)
+knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
+```
+
+### Plot absolute values of catch composition for each fleet over time
+
+```{r plot_catchComp_output2, out.width="70%", out.height="70%"}
+selectors <- c("year")
+divider <- c("fleet")
+p <- plot_catchComp(data, refTable, filters = NULL, relative = FALSE,
+  selectors, divider, yvar = "catch", tryNumericSelector = TRUE)
+
+# ggplot format adjustments
+p <- p + theme(text = element_text(size = 7),
+  axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  facet_wrap(divider, ncol = 5, scales = "free_y") # free y-axis
+
+fname <- paste0(tempfile(), ".png")
+png(fname, width = 6, height = 7, units = "in", res = 400)
 suppressWarnings(print(p))
 out <- dev.off()
 
@@ -433,15 +458,16 @@ knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 ### Plot landings composition for each area by country-metier combinations
 
 
-```{r plot_catchComp_output2, out.width="70%", out.height="70%"}
+```{r plot_catchComp_output3, out.width="70%", out.height="70%"}
 selectors <- c("country", "metier")
 divider <- c("area")
-p <- plot_catchComp(data,refTable,filters = NULL,selectors, divider)
+p <- plot_catchComp(data,refTable,filters = NULL,selectors, divider, 
+  flipAxes = TRUE)
 p <- p + theme(text = element_text(size = 8),
-  axis.text.x = element_text(angle = 90, vjust = 0, hjust=1)) 
+  axis.text.x = element_text(angle = 90, vjust = 0.5)) 
 
 fname <- paste0(tempfile(), ".png")
-png(fname, width = 7, height = 6, units = "in", res = 400)
+png(fname, width = 7, height = 7, units = "in", res = 400)
 suppressWarnings(print(p))
 out <- dev.off()
 
@@ -452,14 +478,15 @@ knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 
 ### Plot landings composition for each metier by country for single year
 
-```{r plot_catchComp_output3, out.width="70%", out.height="70%"}
+```{r plot_catchComp_output4, out.width="70%", out.height="70%"}
 filters <- list(year = 2020) # e.g. last historical data year
 selectors <- c("metier")
 divider <- c("country")
 
-p <- plot_catchComp(data, refTable, filters, selectors, divider)
+p <- plot_catchComp(data, refTable, filters, selectors, divider, 
+  flipAxes = TRUE)
 p <- p + theme(text = element_text(size = 8),
-  axis.text.x = element_text(angle = 90, vjust = 0, hjust=1)) 
+  axis.text.x = element_text(angle = 90, vjust = 0.5)) 
 
 fname <- paste0(tempfile(), ".png")
 png(fname, width = 7, height = 6, units = "in", res = 400)
@@ -553,9 +580,12 @@ knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 
 ## Catch alluvial plot
 
-Two main objects used by the `plot_catchAlluvial` function: a `data` object and the `refTable` object. 
+Two main objects used by the `plot_alluvial` function: a `data` object and the `refTable` object. 
 
 The `data` object contains the catches or landings (variable `value`) per `fleet`, `metier` and `stock`. The typical `refTable` object is also used to, which contains the corresponding colors (`col`), plotting order (`order`) for each `stock`.
+
+The `data` object contains information for making an alluvial-type plot (e.g. catch or landings). This data.frame should contain several variables for grouping (Default: `group_vars = c("fleet", "metier", "stock")`) as well as a variable to plot values (`value`). The typical `refTable` object is also used to contains the corresponding colors (`col`) and plotting order (`order`) for each level of the grouping variable used for fill colors (Default: `fill_var = "stock"`). See 
+`?plot_alluvial` for further settings.
 
 ```{r plot_catchAlluvial_data_prep, include=FALSE}
 data("stfMtStkSum")
@@ -573,14 +603,14 @@ data$stock <- refTable$stock[match(data$stock, refTable$stock_short)]
 names(data)[4] <- "value"
 ```
 
-```{r plot_catchAlluvial_data}
+```{r plot_alluvial_data}
 data[1:100,]
 ```
 
 
 
 ```{r plot_catchAlluvial_output, out.width="70%", out.height="70%"}
-p <- plot_catchAlluvial(data = data, refTable = refTable, text_size = 2)
+p <- plot_alluvial(data = data, refTable = refTable, text_size = 2)
 
 fname <- paste0(tempfile(), ".png")
 png(fname, width = 6, height = 6, units = "in", res = 400)
@@ -594,8 +624,8 @@ knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 As in the above example, labels may overlap with many levels or small contributions. The plotting function has the option to try and arrange the labels to prevent overlapping using the `ggrepel` package (argument: `text_repel = TRUE`):
 
 
-```{r plot_catchAlluvial_output2, out.width="70%", out.height="70%"}
-p <- plot_catchAlluvial(data = data, refTable = refTable, text_size = 2, 
+```{r plot_alluvial_output2, out.width="70%", out.height="70%"}
+p <- plot_alluvial(data = data, refTable = refTable, text_size = 2, 
   text_repel = TRUE, stratum_width = 0.2, nudge_x = 0.3, mult_x = c(0.1, 0.3))
 
 fname <- paste0(tempfile(), ".png")
@@ -612,7 +642,7 @@ By default, the plot contains a legend as to the fill colors of the stocks. This
 
 
 ```{r plot_catchAlluvial_output3, out.width="70%", out.height="70%"}
-p <- plot_catchAlluvial(data = data, refTable = refTable, text_size = 2, 
+p <- plot_alluvial(data = data, refTable = refTable, text_size = 2, 
   text_repel = TRUE, stratum_width = 0.2, nudge_x = 0.3, mult_x = c(0.1, 0.3), 
   addLegend = FALSE, stratum_col = "grey90")
 

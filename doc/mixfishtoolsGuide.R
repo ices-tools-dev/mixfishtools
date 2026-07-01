@@ -26,7 +26,7 @@ knitr::opts_chunk$set(
 library(mixfishtools)
 
 ## ----load_extra, message=FALSE, warning=FALSE---------------------------------
-library(mixfishtools)
+library(png)
 
 ## ----plot_catchScenStk_data_prep, include=FALSE-------------------------------
 # make example data
@@ -277,15 +277,16 @@ data[1:100,]
 ## ----plot_catchComp_output, out.width="70%", out.height="70%"-----------------
 selectors <- c("year")
 divider <- c("fleet")
-p <- plot_catchComp(data, refTable, filters = NULL, selectors, divider, yvar = "catch")
+p <- plot_catchComp(data, refTable, filters = NULL, 
+  selectors, divider, yvar = "catch", tryNumericSelector = TRUE)
 
 # ggplot format adjustments
 p <- p + theme(text = element_text(size = 8),
-  axis.text.x = element_text(angle = 90, vjust = 0, hjust=1)) +
-  facet_wrap(divider,  scales = "fixed") # remove free axes
+  axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  facet_wrap(divider, ncol = 5, scales = "fixed") # remove free axes
 
 fname <- paste0(tempfile(), ".png")
-png(fname, width = 6, height = 6, units = "in", res = 400)
+png(fname, width = 6, height = 7, units = "in", res = 400)
 suppressWarnings(print(p))
 out <- dev.off()
 
@@ -293,14 +294,18 @@ tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 
 ## ----plot_catchComp_output2, out.width="70%", out.height="70%"----------------
-selectors <- c("country", "metier")
-divider <- c("area")
-p <- plot_catchComp(data,refTable,filters = NULL,selectors, divider)
-p <- p + theme(text = element_text(size = 8),
-  axis.text.x = element_text(angle = 90, vjust = 0, hjust=1)) 
+selectors <- c("year")
+divider <- c("fleet")
+p <- plot_catchComp(data, refTable, filters = NULL, relative = FALSE,
+  selectors, divider, yvar = "catch", tryNumericSelector = TRUE)
+
+# ggplot format adjustments
+p <- p + theme(text = element_text(size = 7),
+  axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  facet_wrap(divider, ncol = 5, scales = "free_y") # free y-axis
 
 fname <- paste0(tempfile(), ".png")
-png(fname, width = 7, height = 6, units = "in", res = 400)
+png(fname, width = 6, height = 7, units = "in", res = 400)
 suppressWarnings(print(p))
 out <- dev.off()
 
@@ -308,13 +313,30 @@ tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 
 ## ----plot_catchComp_output3, out.width="70%", out.height="70%"----------------
+selectors <- c("country", "metier")
+divider <- c("area")
+p <- plot_catchComp(data,refTable,filters = NULL,selectors, divider, 
+  flipAxes = TRUE)
+p <- p + theme(text = element_text(size = 8),
+  axis.text.x = element_text(angle = 90, vjust = 0.5)) 
+
+fname <- paste0(tempfile(), ".png")
+png(fname, width = 7, height = 7, units = "in", res = 400)
+suppressWarnings(print(p))
+out <- dev.off()
+
+tmp <- png::readPNG(fname)
+knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
+
+## ----plot_catchComp_output4, out.width="70%", out.height="70%"----------------
 filters <- list(year = 2020) # e.g. last historical data year
 selectors <- c("metier")
 divider <- c("country")
 
-p <- plot_catchComp(data, refTable, filters, selectors, divider)
+p <- plot_catchComp(data, refTable, filters, selectors, divider, 
+  flipAxes = TRUE)
 p <- p + theme(text = element_text(size = 8),
-  axis.text.x = element_text(angle = 90, vjust = 0, hjust=1)) 
+  axis.text.x = element_text(angle = 90, vjust = 0.5)) 
 
 fname <- paste0(tempfile(), ".png")
 png(fname, width = 7, height = 6, units = "in", res = 400)
@@ -407,11 +429,11 @@ data <- subset(stfMtStkSum, year == 2020 & scenario == "min" &
 data$stock <- refTable$stock[match(data$stock, refTable$stock_short)]
 names(data)[4] <- "value"
 
-## ----plot_catchAlluvial_data--------------------------------------------------
+## ----plot_alluvial_data-------------------------------------------------------
 data[1:100,]
 
 ## ----plot_catchAlluvial_output, out.width="70%", out.height="70%"-------------
-p <- plot_catchAlluvial(data = data, refTable = refTable, text_size = 2)
+p <- plot_alluvial(data = data, refTable = refTable, text_size = 2)
 
 fname <- paste0(tempfile(), ".png")
 png(fname, width = 6, height = 6, units = "in", res = 400)
@@ -421,8 +443,8 @@ out <- dev.off()
 tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 
-## ----plot_catchAlluvial_output2, out.width="70%", out.height="70%"------------
-p <- plot_catchAlluvial(data = data, refTable = refTable, text_size = 2, 
+## ----plot_alluvial_output2, out.width="70%", out.height="70%"-----------------
+p <- plot_alluvial(data = data, refTable = refTable, text_size = 2, 
   text_repel = TRUE, stratum_width = 0.2, nudge_x = 0.3, mult_x = c(0.1, 0.3))
 
 fname <- paste0(tempfile(), ".png")
@@ -434,7 +456,7 @@ tmp <- png::readPNG(fname)
 knitr::include_graphics(fname, dpi = floor(dim(tmp)[2]/6))
 
 ## ----plot_catchAlluvial_output3, out.width="70%", out.height="70%"------------
-p <- plot_catchAlluvial(data = data, refTable = refTable, text_size = 2, 
+p <- plot_alluvial(data = data, refTable = refTable, text_size = 2, 
   text_repel = TRUE, stratum_width = 0.2, nudge_x = 0.3, mult_x = c(0.1, 0.3), 
   addLegend = FALSE, stratum_col = "grey90")
 

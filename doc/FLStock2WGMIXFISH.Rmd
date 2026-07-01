@@ -621,7 +621,6 @@ kable(tab, longtable=T, booktabs = T,align="l") |>
 -   dplyr: `r packageVersion('dplyr')`
 -   FLCore: `r packageVersion('FLCore')`
 -   ggplotFL: `r packageVersion('ggplotFL')`
--   reshape2: `r packageVersion('reshape2')`
 -   spict: `r packageVersion('spict')`
 -   stockassessment: `r packageVersion('stockassessment')`
 -   FLfse: `r packageVersion('FLfse')`

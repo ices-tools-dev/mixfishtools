@@ -78,7 +78,7 @@ library(mixfishtools)
 A further package to read and embed the produced .png files:
 
 ```{r load_extra, message=FALSE, warning=FALSE}
-library(mixfishtools)
+library(png)
 ```
 
 
