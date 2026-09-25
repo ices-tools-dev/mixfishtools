@@ -8,7 +8,7 @@ Maintainer: Marc Taylor <marc.taylor@thuenen.de>
 Description: Contains plot templates used in WGMIXFISH-ADVICE and Fisheries 
   Overviews.
 Depends:
-    R (>= 4.0),
+    R (>= 4.1),
     ggplot2,
     ggrepel,
     ggalluvial,
@@ -30,5 +30,5 @@ Suggests:
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: false
-RoxygenNote: 7.3.3
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.1.0

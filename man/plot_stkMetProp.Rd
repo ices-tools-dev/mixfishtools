@@ -13,6 +13,11 @@ the stocks in alphabetical order), `metCat` (which indicates the metier
 categories), `prop_stock` (which indicates proportion of total stock
 landings associated with each metier category), and `label` (which
 indicates the ICES stock code).}
+
+\item{text_size}{size of text}
+
+\item{face}{an aesthetic or parameter inside element_text() that controls
+the font style of text elements like titles, axis labels, and legends.}
 }
 \value{
 plot output of class ggplot

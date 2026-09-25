@@ -8,6 +8,9 @@
 #'   categories), `prop_stock` (which indicates proportion of total stock
 #'   landings associated with each metier category), and `label` (which
 #'   indicates the ICES stock code).
+#' @param text_size size of text
+#' @param face an aesthetic or parameter inside element_text() that controls
+#'   the font style of text elements like titles, axis labels, and legends.
 #'
 #' @details Users will need to provide the data to produce the plot.
 #'
